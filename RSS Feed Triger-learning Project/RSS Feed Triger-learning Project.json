@@ -1,0 +1,183 @@
+{
+  "createdAt": "2025-08-08T08:03:48.433Z",
+  "updatedAt": "2025-09-29T09:13:08.000Z",
+  "id": "MBTEN2FnEIavVdmg",
+  "name": "RSS Feed Triger-learning Project",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://techcrunch.com/feed/"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        -48
+      ],
+      "id": "9a8f9b30-fe60-4437-9209-84914035c9db",
+      "name": "RSS Feed Trigger"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f0224718-fafc-44a3-994f-c050cca994df",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "AI",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -400,
+        -48
+      ],
+      "id": "e3b4f952-fecd-4214-94bb-3678e0f11f41",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "U098EK6VB0D",
+          "mode": "list",
+          "cachedResultName": "sarib.irenic"
+        },
+        "text": "={{ $json.title }}{{ $json.link }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -48,
+        -256
+      ],
+      "id": "45007060-b36d-4b60-bd6e-61646c5f3984",
+      "name": "Send a message",
+      "webhookId": "abeb783a-f8cd-483a-b50a-fe33df7f9a7c",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "HpUSZv6wF2E5Nj2N",
+          "name": "Slack account 5"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        48
+      ],
+      "id": "55180daf-ccf6-40d4-b606-633558ae068c",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "content": "RSS Trigger Node each minute for url https://techcrunch.com/feed/",
+        "height": 128,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -784,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "d1d33924-eee0-4bc8-9407-866bbca26cee",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Checking If title contain the Word Ai so it send a message to the user in this example sarib is selected else do nothing"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -480,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "f4bfd842-f608-475f-975d-a323f228d4ee",
+      "name": "Sticky Note1"
+    }
+  ],
+  "connections": {
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "fad3a7c7-9b22-4ec3-81f1-3290dca530dd",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-08-08T08:03:48.441Z",
+      "updatedAt": "2025-08-08T08:03:48.441Z",
+      "role": "workflow:owner",
+      "workflowId": "MBTEN2FnEIavVdmg",
+      "projectId": "zHjIixMuDBpDICPD"
+    }
+  ],
+  "tags": []
+}
