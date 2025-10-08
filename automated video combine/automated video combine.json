@@ -1,0 +1,271 @@
+{
+  "createdAt": "2025-08-07T10:49:05.430Z",
+  "updatedAt": "2025-08-08T08:03:34.000Z",
+  "id": "8gpiIosUJU7PkDhK",
+  "name": "automated video combine",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1616,
+        -432
+      ],
+      "id": "24e3d23e-ca59-475b-bc0c-37e6eca974b2",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "rm -rf /data/shared/sarib/*"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -480
+      ],
+      "id": "926724fd-ea96-4d13-a58f-8d1177c2ad22",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1XLqf3M27aKOPyFjlMGAFFUudIys9eEPV",
+          "mode": "list",
+          "cachedResultName": "119289-717336867_small.mp4",
+          "cachedResultUrl": "https://drive.google.com/file/d/1XLqf3M27aKOPyFjlMGAFFUudIys9eEPV/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1328,
+        -320
+      ],
+      "id": "fea5df4f-2bdd-40e4-a625-10b164a19e29",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AnfwAjxNrfLJbZz4",
+          "name": "Google Drive account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1LNnQD0ksZjcn-fmeR2QbzAXGeH226fyH",
+          "mode": "list",
+          "cachedResultName": "saying-thank-you-238588.mp3",
+          "cachedResultUrl": "https://drive.google.com/file/d/1LNnQD0ksZjcn-fmeR2QbzAXGeH226fyH/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1328,
+        -608
+      ],
+      "id": "cccd0516-685e-4e64-a5a4-b50cac48cb9c",
+      "name": "Download file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AnfwAjxNrfLJbZz4",
+          "name": "Google Drive account 8"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -672,
+        -480
+      ],
+      "id": "0e77466b-fffb-41a2-99cd-6ffa4b95bdbe",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/data/shared/sarib/saying-thank-you-238588.mp3",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -1008,
+        -608
+      ],
+      "id": "8cf124bd-e6ba-4221-ab55-162bcfc344ea",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/data/shared/sarib/119289-717336867_small.mp4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -992,
+        -336
+      ],
+      "id": "e420e8bf-988c-43cc-aaa7-3c917769023a",
+      "name": "Read/Write Files from Disk1"
+    },
+    {
+      "parameters": {
+        "command": "=ffmpeg -i /data/shared/sarib/119289-717336867_small.mp4 -i /data/shared/sarib/saying-thank-you-238588.mp3 -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 \"/data/shared/sarib/merged-output.mp4\"\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -480
+      ],
+      "id": "bdeccc6a-37c1-4c52-a9ef-8e76b54d2266",
+      "name": "Execute Command1"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/data/shared/sarib/merged-output.mp4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -480
+      ],
+      "id": "89824a12-541c-40f4-837a-8922d390e528",
+      "name": "Read/Write Files from Disk2"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Execute Command1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk2": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "22a9ca44-fc46-4850-a9d7-1745d5d45482",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-08-07T10:49:05.437Z",
+      "updatedAt": "2025-08-07T10:49:05.437Z",
+      "role": "workflow:owner",
+      "workflowId": "8gpiIosUJU7PkDhK",
+      "projectId": "zHjIixMuDBpDICPD"
+    }
+  ],
+  "tags": []
+}
