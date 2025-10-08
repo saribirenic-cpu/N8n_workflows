@@ -1,0 +1,364 @@
+{
+  "name": "lead generation",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Query Form",
+        "formDescription": "Fill all the relative details",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "name",
+              "placeholder": "Enter your name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "business_nature",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "phone",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "website"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -560,
+        -304
+      ],
+      "id": "a575a967-cb43-4fe0-a264-42ca5284cdd5",
+      "name": "On form submission",
+      "webhookId": "34e3e0f6-13bb-488f-ae06-ff1faea689fe"
+    },
+    {
+      "parameters": {
+        "operation": "google_maps",
+        "q": "={{ $json.chatInput }}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        -48
+      ],
+      "id": "2cb3cf28-20ad-4dc7-9e0a-7f350aeb8392",
+      "name": "Google_maps search",
+      "credentials": {
+        "serpApi": {
+          "id": "xLy5p6beWWnzcOEY",
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -640,
+        -48
+      ],
+      "id": "cdccfdd4-7183-4898-a6a8-6c6843a5c722",
+      "name": "When chat message received",
+      "webhookId": "18093fdf-f9b5-4b77-88d0-c3679520a516"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nconst results = $input.first().json.local_results || [];\n\nfor (const data of results) {\n  output.push({\n    json: {\n      name: data.title || null,\n      business_nature: data.type || (data.types ? data.types.join(\", \") : null),\n      phone: data.phone || null,\n      email: null, // not provided by SerpAPI\n      website: data.website || null,\n    }\n  });\n}\n\nreturn output;\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        -48
+      ],
+      "id": "306fce6e-bf72-4c98-8ec5-536acd4f6888",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appsrCg5gjJ9iCVta",
+          "mode": "list",
+          "cachedResultName": "n8n_tetsing (Copy)",
+          "cachedResultUrl": "https://airtable.com/appsrCg5gjJ9iCVta"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbloA1LJHHUgzUUy3",
+          "mode": "list",
+          "cachedResultName": "Table 4",
+          "cachedResultUrl": "https://airtable.com/appsrCg5gjJ9iCVta/tbloA1LJHHUgzUUy3"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "number": "={{ $json.phone }}",
+            "Name": "={{ $json.name }}",
+            "Business Nature": "={{ $json.business_nature }}",
+            "email": "={{ $json.email }}",
+            "website": "={{ $json.website }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "number",
+              "displayName": "number",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Business Nature",
+              "displayName": "Business Nature",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -32,
+        -48
+      ],
+      "id": "4dc166ce-c65f-4ec3-b83c-8307500eeecd",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "eUeRGdDoEP8TLhtZ",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.fields }}",
+        "options": {
+          "systemMessage": "=You are a helpful assistant. you are connected with airtable in which there are record now your task is to examine the sheet and if you find any email in it to send the email on the behalf of our company in which tell them how our automation team can help in their for automation you email should be professional and smart enough.Use your gmail tool to send the email give the appropriate subject and body.\n\nyour email format should be:\n\ngreeting:\"Hello {{ $json.fields.Name }}\"\nbody: \"\"\nregards:\"Irenic Technical Team\"\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        192,
+        -48
+      ],
+      "id": "30900e92-eac6-4e29-8493-2c9893c25c15",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-3.5-turbo-16k",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        192,
+        144
+      ],
+      "id": "088ee2f0-ece9-4785-a06d-8a97c8c28e85",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "l1pDwg7FUjdLudHZ",
+          "name": "OpenRouter account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        352,
+        160
+      ],
+      "id": "b053ec3e-da8b-4bf9-9fdb-d321a22f763c",
+      "name": "Send a message in Gmail",
+      "webhookId": "c677dc81-6c56-44da-82c8-5cef3da463d4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "eRiI99u4SITXibOs",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Google_maps search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google_maps search": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "name": "sarib",
+          "business_nature": "fragrance",
+          "phone": "03322477394",
+          "email": "saribjunaid5@gmail.com",
+          "website": "www.perfume.com",
+          "submittedAt": "2025-08-18T12:34:11.589+05:00",
+          "formMode": "test"
+        }
+      }
+    ]
+  },
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

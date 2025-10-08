@@ -1,0 +1,1075 @@
+{
+  "name": "Off-Grid Land Pipeline Extention",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1696,
+        -112
+      ],
+      "id": "a1888f14-fcc3-41b8-bd4d-10a7041ab7e5",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f5050743-d2db-4491-82c1-eff01a7032be",
+              "name": "status",
+              "value": "ForSale",
+              "type": "string"
+            },
+            {
+              "id": "66220273-f3eb-4b3a-a657-fd6780c28b6e",
+              "name": "City",
+              "value": "Houston",
+              "type": "string"
+            },
+            {
+              "id": "a1230132-3db6-4dfa-aaeb-c0658eb1ad1c",
+              "name": "Price_min",
+              "value": "20000",
+              "type": "string"
+            },
+            {
+              "id": "a442a598-a560-483c-8f57-7ab9c74e50ff",
+              "name": "beds_min",
+              "value": "2",
+              "type": "string"
+            },
+            {
+              "id": "5de10dab-9f73-4743-b736-bfa20e05b340",
+              "name": "baths_min",
+              "value": "1",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1440,
+        -112
+      ],
+      "id": "42c513ac-7cd1-425a-aaa8-366fdaf24764",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "https://zillow56.p.rapidapi.com/search?",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "=status",
+              "value": "={{ $json.status }}"
+            },
+            {
+              "name": "location",
+              "value": "={{ $json.City }}"
+            },
+            {
+              "name": "Price_min",
+              "value": "={{ $json.Price_min }}"
+            },
+            {
+              "name": "beds_min",
+              "value": "={{ $json.beds_min }}"
+            },
+            {
+              "name": "baths_min",
+              "value": "={{ $json.baths_min }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1200,
+        -112
+      ],
+      "id": "4ea3c528-b557-44be-94e4-ecec56ed2af6",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ZnX6dNLrDHb0CrXm",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1008,
+        -112
+      ],
+      "id": "9e596c5e-b5db-4eff-b82d-3412c82b20d4",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "53a9ce03-6509-4844-be3a-936f1b4e91f7",
+              "name": "Address",
+              "value": "={{ $json.streetAddress }} {{ $json.city }} {{ $json.state }} {{ $json.zipcode }}",
+              "type": "string"
+            },
+            {
+              "id": "c29ce93b-6361-4d9c-8584-d72209d301a1",
+              "name": "HomeStatus",
+              "value": "={{ $json.homeStatus }}",
+              "type": "string"
+            },
+            {
+              "id": "af26430b-619d-460e-9bf7-58ba0970ba8b",
+              "name": "price",
+              "value": "={{ $json.price }}",
+              "type": "string"
+            },
+            {
+              "id": "e7ebc87e-ed7f-4a84-be30-fb547a023c50",
+              "name": "Area",
+              "value": "={{ $json.lotAreaValue }} {{ $json.lotAreaUnit }}",
+              "type": "string"
+            },
+            {
+              "id": "9dc98eb2-9e34-4490-9197-f188b39fbae8",
+              "name": "Country",
+              "value": "={{ $json.country }}",
+              "type": "string"
+            },
+            {
+              "id": "cbfb17b9-1b5c-43ef-a96b-3519f32e22a5",
+              "name": "homeType",
+              "value": "={{ $json.homeType }}",
+              "type": "string"
+            },
+            {
+              "id": "9bd9ecbb-548a-4b60-aa1b-dfc99ea3d582",
+              "name": "zestimate",
+              "value": "={{ $json.zestimate }}",
+              "type": "string"
+            },
+            {
+              "id": "e95ab0e5-d576-4590-86cc-af5df3d90442",
+              "name": "zpid",
+              "value": "={{ $json.zpid }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -832,
+        -112
+      ],
+      "id": "40ac91f3-f2f8-4c5d-9060-a06898455f71",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ----- CONFIGURABLE ASSUMPTIONS -----\nconst DOWN_PCT = 0.20;         // 20% down payment\nconst CLOSING_COST_PCT = 0.03; // 3% closing cost\nconst ANNUAL_INT_RATE = 0.065; // 6.5% annual interest\nconst LOAN_TERM_YEARS = 30;    // 30 years fixed\nconst PROPERTY_TAX_RATE = 0.0125; // 1.25% annual property tax\n\n// Get all incoming items from previous node\nreturn items.map(item => {\n  const prop = item.json;\n\n  // --- Financial Calculations ---\n  const downPayment = prop.price * DOWN_PCT;\n  const closingCosts = prop.price * CLOSING_COST_PCT;\n  const loanAmount = prop.price - downPayment;\n  const monthlyInterestRate = ANNUAL_INT_RATE / 12;\n  const numPayments = LOAN_TERM_YEARS * 12;\n\n  // Mortgage formula\n  const monthlyMortgage = (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numPayments)) /\n                          (Math.pow(1 + monthlyInterestRate, numPayments) - 1);\n\n  const annualPropertyTax = prop.price * PROPERTY_TAX_RATE;\n  const monthlyPropertyTax = annualPropertyTax / 12;\n\n  const totalMonthlyPayment = monthlyMortgage + monthlyPropertyTax;\n\n  // --- Merge calculations into original object ---\n  return {\n    json: {\n      ...prop, // keep all original fields\n      downPayment: parseFloat(downPayment.toFixed(2)),\n      closingCosts: parseFloat(closingCosts.toFixed(2)),\n      loanAmount: parseFloat(loanAmount.toFixed(2)),\n      monthlyMortgage: parseFloat(monthlyMortgage.toFixed(2)),\n      monthlyPropertyTax: parseFloat(monthlyPropertyTax.toFixed(2)),\n      totalMonthlyPayment: parseFloat(totalMonthlyPayment.toFixed(2))\n    }\n  };\n});\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        -112
+      ],
+      "id": "8c2672fb-1069-4655-8997-c25717ee1eb6",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        -112
+      ],
+      "id": "861cc994-f753-4183-840d-10d396d7b63e",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is today’s dataset of property listings:\n\n{{ $json.data }}\n\nEach property contains:\n- Raw listing details (address, price, area, homeType, zestimate, etc.)\n- Calculated financials (downPayment, closingCosts, loanAmount, monthlyMortgage, monthlyPropertyTax, totalMonthlyPayment)\n\nYour task:\n1. Score each property 0–100 using the selection criteria.\n2. Select:\n   - 1 long-term pick (slightly outside current criteria but promising for future).\n   - 2–4 immediate picks (strong fits for current acquisition).\n   - 1 curveball pick (unusual but potentially strategic).\n3. For each selected property, return:\n   - Score (0–100)\n   - Selection type (long-term / immediate / curveball)\n   - 3–4 sentence rationale explaining the choice and trade-offs.\n4. Provide a short \"What we learned today\" note (max 100 words) summarizing insights from this batch that could improve future searches.\n\nOutput your answer strictly in valid JSON with this structure:\n{\n  \"picks\": [\n    {\n      \"address\": \"\",\n      \"HomeStatus\":\"\",\n      \"price\": \"\",\n      \"Area\": \"\",\n      \"Country\": \"\",\n      \"homeType\": \"\",\n      \"zestimate\": \"\",\n      \"zpid\": \"\",\n      \"downPayment\": \"\",\n      \"closingCosts\": \"\",\n      \"loanAmount\": \"\",\n      \"monthlyMortgage\": \"\",\n      \"monthlyPropertyTax\": \"\",\n      \"totalMonthlyPayment\": \"\"\n      \"score\": 0,\n      \"selectionType\": \"\",\n      \"rationale\": \"\"\n    }\n  ],\n  \n\n\n",
+        "options": {
+          "systemMessage": "=You are an expert land acquisition scout for the Essential Homes: Off-Grid development concept.\n\nYour mission: Review daily property listings and select the most promising parcels for acquisition.\n\nSelection criteria (most important first):\n1. Location — must be in target states and regionally favorable for off-grid living.\n2. Access — legal, reliable road or easement access.\n3. Parcel Size & Shape — meets minimum acreage and usable shape for building.\n4. Price & Value — below target price per acre, good market value.\n5. Topography & Buildability — mostly flat or gently sloping, not flood-prone.\n6. Zoning & Restrictions — allows residential/off-grid builds, minimal restrictions.\n7. Utilities & Off-Grid Potential — supports solar/wind/water catchment, no HOA bans.\n8. Natural Features — privacy trees, views, or nearby water are positives.\n9. Proximity — near enough to small towns for supplies, far enough for privacy.\n10. Market & Liquidity — good resale potential.\n\nWeigh these based on past feedback from Airtable (“Your Verdict” & “Reason Tags”), adjusting over time.\n\nAlways respond in **valid JSON** exactly matching the output format shown in the example.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -160,
+        -112
+      ],
+      "id": "4260ed89-9063-4704-af77-f99925504784",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        48
+      ],
+      "id": "1a51ce03-725d-4a71-82fb-a8179f1ab2a9",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "LsOVhpjqmWUL8pFT",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get AI model's JSON string from previous node\nconst rawOutput = $json.output;\n\n// Parse JSON string into an object\nconst parsed = JSON.parse(rawOutput);\n\n// Prepare array for Airtable\nconst output = [];\n\nfor (const pick of parsed.picks) {\n  output.push({\n    json: {\n      Address: pick.address || \"\",\n      HomeStatus: pick.HomeStatus || \"\",\n      price: pick.price || \"\",\n      Area: pick.Area || \"\",\n      Country: pick.Country || \"\",\n      homeType: pick.homeType || \"\",\n      zestimate: pick.zestimate || \"\",\n      zpid: pick.zpid || \"\",\n      downPayment: pick.downPayment || \"\",\n      closingCosts: pick.closingCosts || \"\",\n      loanAmount: pick.loanAmount || \"\",\n      monthlyMortgage: pick.monthlyMortgage || \"\",\n      monthlyPropertyTax: pick.monthlyPropertyTax || \"\",\n      totalMonthlyPayment: pick.totalMonthlyPayment || \"\",\n      score: pick.score || \"\",\n      selectionType: pick.selectionType || \"\",\n      rationale: pick.rationale || \"\"\n    }\n  });\n}\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -112
+      ],
+      "id": "a1d69556-8500-4b36-abea-408c7387d5f8",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "apprao6VteOIQ6amd",
+          "mode": "list",
+          "cachedResultName": "n8n_tetsing",
+          "cachedResultUrl": "https://airtable.com/apprao6VteOIQ6amd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVWrsiMthhFKTNS",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/apprao6VteOIQ6amd/tblVWrsiMthhFKTNS"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Address": "={{ $json.Address }}",
+            "HomeStatus": "={{ $json.HomeStatus }}",
+            "price": "={{ $json.price }}",
+            "Area": "={{ $json.Area }}",
+            "Country": "={{ $json.Country }}",
+            "homeType": "={{ $json.homeType }}",
+            "Zestimate": "={{ $json.zestimate }}",
+            "Zid": "={{ $json.zpid }}",
+            "downpayment": "={{ $json.downPayment }}",
+            "closingcost": "={{ $json.closingCosts }}",
+            "loanAmount": "={{ $json.loanAmount }}",
+            "monthlymortage": "={{ $json.monthlyMortgage }}",
+            "monthlyPropertyTax": "={{ $json.monthlyPropertyTax }}",
+            "totalMonthlyPayment": "={{ $json.totalMonthlyPayment }}",
+            "score": "={{ $json.score }}",
+            "selectionType": "={{ $json.selectionType }}",
+            "rationale": "={{ $json.rationale }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "HomeStatus",
+              "displayName": "HomeStatus",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Area",
+              "displayName": "Area",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Country",
+              "displayName": "Country",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "homeType",
+              "displayName": "homeType",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Zestimate",
+              "displayName": "Zestimate",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Zid",
+              "displayName": "Zid",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "downpayment",
+              "displayName": "downpayment",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "closingcost",
+              "displayName": "closingcost",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "loanAmount",
+              "displayName": "loanAmount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "monthlymortage",
+              "displayName": "monthlymortage",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "monthlyPropertyTax",
+              "displayName": "monthlyPropertyTax",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "totalMonthlyPayment",
+              "displayName": "totalMonthlyPayment",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "selectionType",
+              "displayName": "selectionType",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "rationale",
+              "displayName": "rationale",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        384,
+        -112
+      ],
+      "id": "49e7d611-4c9e-444a-8e98-0927b49231bc",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "eUeRGdDoEP8TLhtZ",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1600,
+        224
+      ],
+      "id": "c4abc891-e620-47e7-89a9-8a847a977afd",
+      "name": "When chat message received",
+      "webhookId": "f89855df-3e05-4367-80d4-fa500f5722e5"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "apprao6VteOIQ6amd",
+          "mode": "list",
+          "cachedResultName": "n8n_tetsing",
+          "cachedResultUrl": "https://airtable.com/apprao6VteOIQ6amd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVWrsiMthhFKTNS",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/apprao6VteOIQ6amd/tblVWrsiMthhFKTNS"
+        },
+        "filterByFormula": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Filter_By_Formula', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        -1088,
+        464
+      ],
+      "id": "a05fd9a0-decd-451b-813a-c7660bc633ec",
+      "name": "Search records in Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "eUeRGdDoEP8TLhtZ",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are a real estate property search assistant.\n\n1. When the user makes their initial request:\n   - Convert the request into an Airtable formula that matches only the fields they mention.\n   - Ignore unspecified fields.\n   - Use AND(...) if multiple filters are mentioned.\n   - Query Airtable using this formula.\n   - Return ONLY a single valid JSON object in this exact format, with no extra text before or after:\n\n{\n  \"recommendations\": [\n    {\n      \"Address\": \"\",\n      \"HomeStatus\": \"\",\n      \"price\": \"\",\n      \"Area\": \"\",\n      \"Country\": \"\"\n    }\n  ]\n}\n\n   - If there are no matches, return exactly:\n{ \"recommendations\": [] }\n\n2. Do NOT add any conversational phrases, explanations, or formatting (such as markdown) when providing recommendations.\n   - Absolutely no text outside the JSON.\n\n3. After providing recommendations:\n   - Wait for the user to select a property before proceeding.\n   - When they select a property, respond naturally to acknowledge their choice and ask for their feedback on it.\n     Example: \"Got it! Could you please share your feedback on this property?\"\n\n4. When the user provides feedback:\n   - Respond with a short closing message.\n     Example: \"Thank you for your feedback! I'm glad I could assist you today.\"\n\n5. Never request feedback unless the user has already selected a property.\n6. Never include JSON when acknowledging a property selection or giving a thank-you message.\n7. Always ensure JSON responses are strictly valid — no trailing commas, no extra text.\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1312,
+        224
+      ],
+      "id": "864a0620-18a9-4f9b-b68a-a317ea2dd220",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "apprao6VteOIQ6amd",
+          "mode": "list",
+          "cachedResultName": "n8n_tetsing",
+          "cachedResultUrl": "https://airtable.com/apprao6VteOIQ6amd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXrVtZw0vFETbnx",
+          "mode": "list",
+          "cachedResultName": "Table 2",
+          "cachedResultUrl": "https://airtable.com/apprao6VteOIQ6amd/tblXrVtZw0vFETbnx"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "User Query": "={{ $json['User Query'] }}",
+            "AI Output JSON": "={{ JSON.stringify($json[\"AI Output JSON\"]) }}",
+            "Selected Property": "={{ $json['Selected Property'] }}",
+            "User Feedback": "={{ $json['User Feedback'] }}",
+            "session id": "={{ $json['Session ID'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "session id",
+              "displayName": "session id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "User Query",
+              "displayName": "User Query",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Output JSON",
+              "displayName": "AI Output JSON",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Selected Property",
+              "displayName": "Selected Property",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "User Feedback",
+              "displayName": "User Feedback",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        432,
+        144
+      ],
+      "id": "66bdb539-bf8a-4b92-b70e-c102810dc3c9",
+      "name": "Create a record1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "eUeRGdDoEP8TLhtZ",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-3.5-turbo-16k",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1408,
+        448
+      ],
+      "id": "02f6a7e0-db27-45c0-93b3-6c70a3507307",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "lOqmjIo3j2jFpal7",
+          "name": "OpenRouter account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -1264,
+        448
+      ],
+      "id": "26aa53bb-1b77-4b1e-8692-6683f8b2d890",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "EfptZRENOqXWOcUb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT message\nFROM n8n_chat_histories\nWHERE session_id = '{{ $('When chat message received').item.json.sessionId }}'\nORDER BY session_id DESC\nLIMIT 6;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -848,
+        224
+      ],
+      "id": "d14f01b6-1a18-4c43-8499-8a88741ef5b0",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "EfptZRENOqXWOcUb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the SQL output\nconst rows = $input.all().map(i => i.json).filter(Boolean);\n\n// Get sessionId from the chat trigger\nconst sessionId = $('When chat message received').first().json.sessionId || null;\n\nif (rows.length === 0) {\n  return [{\n    json: {\n      error: \"No messages found from SQL query\",\n      sessionId\n    }\n  }];\n}\n\nlet result = {\n  \"Session ID\": sessionId, // Add sessionId for Airtable primary key\n  \"User Query\": \"\",\n  \"AI Output JSON\": \"\",\n  \"Selected Property\": \"\",\n  \"User Feedback\": \"\"\n};\n\nlet humanCount = 0;\n\nfor (let row of rows) {\n  const msg = row.message;\n  if (!msg || !msg.type) continue;\n\n  if (msg.type === \"human\") {\n    humanCount++;\n    if (humanCount === 1) {\n      result[\"User Query\"] = msg.content;\n    } else if (humanCount === 2) {\n      result[\"Selected Property\"] = msg.content;\n    } else if (humanCount === 3) {\n      result[\"User Feedback\"] = msg.content;\n    }\n  }\n\n  if (msg.type === \"ai\" && !result[\"AI Output JSON\"]) {\n    try {\n      result[\"AI Output JSON\"] = JSON.parse(msg.content);\n    } catch {\n      result[\"AI Output JSON\"] = msg.content;\n    }\n  }\n}\n\n// Return result with sessionId for Airtable upsert\nreturn [{ json: result }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        224
+      ],
+      "id": "289b0ae1-807f-41ce-a53b-694f890cf2eb",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2d8e90c8-1d91-4eaf-b4c4-d238e7f83913",
+              "leftValue": "={{ $json['Session ID'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "f670dc66-c8b0-4b31-8e1e-67b18c261bf1",
+              "leftValue": "={{ $json['User Query'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "157b67e0-8482-42ba-8ad0-b0c731bde6ca",
+              "leftValue": "={{ $json['AI Output JSON'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c039ba82-0522-4b66-9569-d5d7c88b9a48",
+              "leftValue": "={{ $json['Selected Property'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "d1c02c71-53c3-41d0-96b4-2ef0ad48618a",
+              "leftValue": "={{ $json['User Feedback'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -112,
+        224
+      ],
+      "id": "1345dffc-4ba0-4a97-9fec-7f803d4b35f4",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get AI Agent2 output\nlet aiOutput = $('AI Agent2').first().json.output;\n\nif (typeof aiOutput === 'string') {\n  // Try to extract the first valid JSON block from the string\n  const match = aiOutput.match(/\\{[\\s\\S]*\\}/);\n  if (match) {\n    aiOutput = match[0]; // Take only the JSON part\n  }\n  try {\n    aiOutput = JSON.parse(aiOutput);\n  } catch (e) {\n    return [{ json: { error: \"Invalid JSON from AI Agent2\", raw: aiOutput } }];\n  }\n}\n\n// Remove null/undefined keys recursively\nfunction clean(obj) {\n  return JSON.parse(JSON.stringify(obj, (key, value) =>\n    value === null || value === undefined ? undefined : value\n  ));\n}\n\nreturn [{ json: clean(aiOutput) }];\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        352
+      ],
+      "id": "00b46bde-e7d4-416a-a14d-12cf98c9f992",
+      "name": "Code4"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records in Airtable": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record1": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create a record1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

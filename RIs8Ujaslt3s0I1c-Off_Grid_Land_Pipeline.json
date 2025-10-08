@@ -1,0 +1,645 @@
+{
+  "name": "Off-Grid Land Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1312,
+        -112
+      ],
+      "id": "153b38e4-3e17-47f3-8555-b0f5da6d0031",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f5050743-d2db-4491-82c1-eff01a7032be",
+              "name": "status",
+              "value": "ForSale",
+              "type": "string"
+            },
+            {
+              "id": "66220273-f3eb-4b3a-a657-fd6780c28b6e",
+              "name": "City",
+              "value": "Houston",
+              "type": "string"
+            },
+            {
+              "id": "a1230132-3db6-4dfa-aaeb-c0658eb1ad1c",
+              "name": "Price_min",
+              "value": "20000",
+              "type": "string"
+            },
+            {
+              "id": "a442a598-a560-483c-8f57-7ab9c74e50ff",
+              "name": "beds_min",
+              "value": "2",
+              "type": "string"
+            },
+            {
+              "id": "5de10dab-9f73-4743-b736-bfa20e05b340",
+              "name": "baths_min",
+              "value": "1",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1072,
+        -112
+      ],
+      "id": "3b6f0c4a-a31b-48e4-b81c-5ce838c137a8",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "https://zillow56.p.rapidapi.com/search?",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "=status",
+              "value": "={{ $json.status }}"
+            },
+            {
+              "name": "location",
+              "value": "={{ $json.City }}"
+            },
+            {
+              "name": "Price_min",
+              "value": "={{ $json.Price_min }}"
+            },
+            {
+              "name": "beds_min",
+              "value": "={{ $json.beds_min }}"
+            },
+            {
+              "name": "baths_min",
+              "value": "={{ $json.baths_min }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -896,
+        -112
+      ],
+      "id": "09185fdf-39af-4fd0-8ec9-9662bdd47e69",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ZnX6dNLrDHb0CrXm",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        -112
+      ],
+      "id": "e178eeea-0e61-412c-a699-73755c6efd80",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "53a9ce03-6509-4844-be3a-936f1b4e91f7",
+              "name": "Address",
+              "value": "={{ $json.streetAddress }} {{ $json.city }} {{ $json.state }} {{ $json.zipcode }}",
+              "type": "string"
+            },
+            {
+              "id": "c29ce93b-6361-4d9c-8584-d72209d301a1",
+              "name": "HomeStatus",
+              "value": "={{ $json.homeStatus }}",
+              "type": "string"
+            },
+            {
+              "id": "af26430b-619d-460e-9bf7-58ba0970ba8b",
+              "name": "price",
+              "value": "={{ $json.price }}",
+              "type": "string"
+            },
+            {
+              "id": "e7ebc87e-ed7f-4a84-be30-fb547a023c50",
+              "name": "Area",
+              "value": "={{ $json.lotAreaValue }} {{ $json.lotAreaUnit }}",
+              "type": "string"
+            },
+            {
+              "id": "9dc98eb2-9e34-4490-9197-f188b39fbae8",
+              "name": "Country",
+              "value": "={{ $json.country }}",
+              "type": "string"
+            },
+            {
+              "id": "cbfb17b9-1b5c-43ef-a96b-3519f32e22a5",
+              "name": "homeType",
+              "value": "={{ $json.homeType }}",
+              "type": "string"
+            },
+            {
+              "id": "9bd9ecbb-548a-4b60-aa1b-dfc99ea3d582",
+              "name": "zestimate",
+              "value": "={{ $json.zestimate }}",
+              "type": "string"
+            },
+            {
+              "id": "e95ab0e5-d576-4590-86cc-af5df3d90442",
+              "name": "zpid",
+              "value": "={{ $json.zpid }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -544,
+        -96
+      ],
+      "id": "e5101525-5bcb-47e2-b431-5137ac311690",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ----- CONFIGURABLE ASSUMPTIONS -----\nconst DOWN_PCT = 0.20;         // 20% down payment\nconst CLOSING_COST_PCT = 0.03; // 3% closing cost\nconst ANNUAL_INT_RATE = 0.065; // 6.5% annual interest\nconst LOAN_TERM_YEARS = 30;    // 30 years fixed\nconst PROPERTY_TAX_RATE = 0.0125; // 1.25% annual property tax\n\n// Get all incoming items from previous node\nreturn items.map(item => {\n  const prop = item.json;\n\n  // --- Financial Calculations ---\n  const downPayment = prop.price * DOWN_PCT;\n  const closingCosts = prop.price * CLOSING_COST_PCT;\n  const loanAmount = prop.price - downPayment;\n  const monthlyInterestRate = ANNUAL_INT_RATE / 12;\n  const numPayments = LOAN_TERM_YEARS * 12;\n\n  // Mortgage formula\n  const monthlyMortgage = (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numPayments)) /\n                          (Math.pow(1 + monthlyInterestRate, numPayments) - 1);\n\n  const annualPropertyTax = prop.price * PROPERTY_TAX_RATE;\n  const monthlyPropertyTax = annualPropertyTax / 12;\n\n  const totalMonthlyPayment = monthlyMortgage + monthlyPropertyTax;\n\n  // --- Merge calculations into original object ---\n  return {\n    json: {\n      ...prop, // keep all original fields\n      downPayment: parseFloat(downPayment.toFixed(2)),\n      closingCosts: parseFloat(closingCosts.toFixed(2)),\n      loanAmount: parseFloat(loanAmount.toFixed(2)),\n      monthlyMortgage: parseFloat(monthlyMortgage.toFixed(2)),\n      monthlyPropertyTax: parseFloat(monthlyPropertyTax.toFixed(2)),\n      totalMonthlyPayment: parseFloat(totalMonthlyPayment.toFixed(2))\n    }\n  };\n});\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        -96
+      ],
+      "id": "8753ca53-e00b-4eff-bdf6-b259a4e77274",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -96
+      ],
+      "id": "49208826-c0d4-4876-b655-9e049ea48b2f",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is today’s dataset of property listings:\n\n{{ $json.data }}\n\nEach property contains:\n- Raw listing details (address, price, area, homeType, zestimate, etc.)\n- Calculated financials (downPayment, closingCosts, loanAmount, monthlyMortgage, monthlyPropertyTax, totalMonthlyPayment)\n\nYour task:\n1. Score each property 0–100 using the selection criteria.\n2. Select:\n   - 1 long-term pick (slightly outside current criteria but promising for future).\n   - 2–4 immediate picks (strong fits for current acquisition).\n   - 1 curveball pick (unusual but potentially strategic).\n3. For each selected property, return:\n   - Score (0–100)\n   - Selection type (long-term / immediate / curveball)\n   - 3–4 sentence rationale explaining the choice and trade-offs.\n4. Provide a short \"What we learned today\" note (max 100 words) summarizing insights from this batch that could improve future searches.\n\nOutput your answer strictly in valid JSON with this structure:\n{\n  \"picks\": [\n    {\n      \"address\": \"\",\n      \"HomeStatus\":\"\",\n      \"price\": \"\",\n      \"Area\": \"\",\n      \"Country\": \"\",\n      \"homeType\": \"\",\n      \"zestimate\": \"\",\n      \"zpid\": \"\",\n      \"downPayment\": \"\",\n      \"closingCosts\": \"\",\n      \"loanAmount\": \"\",\n      \"monthlyMortgage\": \"\",\n      \"monthlyPropertyTax\": \"\",\n      \"totalMonthlyPayment\": \"\"\n      \"score\": 0,\n      \"selectionType\": \"\",\n      \"rationale\": \"\"\n    }\n  ],\n  \n\n\n",
+        "options": {
+          "systemMessage": "=You are an expert land acquisition scout for the Essential Homes: Off-Grid development concept.\n\nYour mission: Review daily property listings and select the most promising parcels for acquisition.\n\nSelection criteria (most important first):\n1. Location — must be in target states and regionally favorable for off-grid living.\n2. Access — legal, reliable road or easement access.\n3. Parcel Size & Shape — meets minimum acreage and usable shape for building.\n4. Price & Value — below target price per acre, good market value.\n5. Topography & Buildability — mostly flat or gently sloping, not flood-prone.\n6. Zoning & Restrictions — allows residential/off-grid builds, minimal restrictions.\n7. Utilities & Off-Grid Potential — supports solar/wind/water catchment, no HOA bans.\n8. Natural Features — privacy trees, views, or nearby water are positives.\n9. Proximity — near enough to small towns for supplies, far enough for privacy.\n10. Market & Liquidity — good resale potential.\n\nWeigh these based on past feedback from Airtable (“Your Verdict” & “Reason Tags”), adjusting over time.\n\nAlways respond in **valid JSON** exactly matching the output format shown in the example.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        80,
+        -96
+      ],
+      "id": "2c25f385-9bdd-4b49-8faf-508e10b146a2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        96
+      ],
+      "id": "ea38d4c2-dd31-485c-82b9-d9b43be9fda8",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "LsOVhpjqmWUL8pFT",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get AI model's JSON string from previous node\nconst rawOutput = $json.output;\n\n// Parse JSON string into an object\nconst parsed = JSON.parse(rawOutput);\n\n// Prepare array for Airtable\nconst output = [];\n\nfor (const pick of parsed.picks) {\n  output.push({\n    json: {\n      Address: pick.address || \"\",\n      HomeStatus: pick.HomeStatus || \"\",\n      price: pick.price || \"\",\n      Area: pick.Area || \"\",\n      Country: pick.Country || \"\",\n      homeType: pick.homeType || \"\",\n      zestimate: pick.zestimate || \"\",\n      zpid: pick.zpid || \"\",\n      downPayment: pick.downPayment || \"\",\n      closingCosts: pick.closingCosts || \"\",\n      loanAmount: pick.loanAmount || \"\",\n      monthlyMortgage: pick.monthlyMortgage || \"\",\n      monthlyPropertyTax: pick.monthlyPropertyTax || \"\",\n      totalMonthlyPayment: pick.totalMonthlyPayment || \"\",\n      score: pick.score || \"\",\n      selectionType: pick.selectionType || \"\",\n      rationale: pick.rationale || \"\"\n    }\n  });\n}\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -96
+      ],
+      "id": "e7c70462-b6f3-49a6-9935-c2a5ef98f4d6",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "apprao6VteOIQ6amd",
+          "mode": "list",
+          "cachedResultName": "n8n_tetsing",
+          "cachedResultUrl": "https://airtable.com/apprao6VteOIQ6amd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVWrsiMthhFKTNS",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/apprao6VteOIQ6amd/tblVWrsiMthhFKTNS"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Address": "={{ $json.Address }}",
+            "HomeStatus": "={{ $json.HomeStatus }}",
+            "price": "={{ $json.price }}",
+            "Area": "={{ $json.Area }}",
+            "Country": "={{ $json.Country }}",
+            "homeType": "={{ $json.homeType }}",
+            "Zestimate": "={{ $json.zestimate }}",
+            "Zid": "={{ $json.zpid }}",
+            "downpayment": "={{ $json.downPayment }}",
+            "closingcost": "={{ $json.closingCosts }}",
+            "loanAmount": "={{ $json.loanAmount }}",
+            "monthlymortage": "={{ $json.monthlyMortgage }}",
+            "monthlyPropertyTax": "={{ $json.monthlyPropertyTax }}",
+            "totalMonthlyPayment": "={{ $json.totalMonthlyPayment }}",
+            "score": "={{ $json.score }}",
+            "selectionType": "={{ $json.selectionType }}",
+            "rationale": "={{ $json.rationale }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "HomeStatus",
+              "displayName": "HomeStatus",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Area",
+              "displayName": "Area",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Country",
+              "displayName": "Country",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "homeType",
+              "displayName": "homeType",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Zestimate",
+              "displayName": "Zestimate",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Zid",
+              "displayName": "Zid",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "downpayment",
+              "displayName": "downpayment",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "closingcost",
+              "displayName": "closingcost",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "loanAmount",
+              "displayName": "loanAmount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "monthlymortage",
+              "displayName": "monthlymortage",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "monthlyPropertyTax",
+              "displayName": "monthlyPropertyTax",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "totalMonthlyPayment",
+              "displayName": "totalMonthlyPayment",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "selectionType",
+              "displayName": "selectionType",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "rationale",
+              "displayName": "rationale",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        624,
+        -96
+      ],
+      "id": "77bc058b-6ad9-4538-82e6-53fbb2127e2c",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "eUeRGdDoEP8TLhtZ",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": null
+}

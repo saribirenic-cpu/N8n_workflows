@@ -1,0 +1,472 @@
+{
+  "name": "Content Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1392,
+        -32
+      ],
+      "id": "1d785c19-6ba5-42fd-81ca-3b2e812a5f78",
+      "name": "When chat message received",
+      "webhookId": "44df22b3-81e3-4611-9e26-9292b8a1b965"
+    },
+    {
+      "parameters": {
+        "operation": "google_trends",
+        "q": "={{ $json.output }}",
+        "additionalFields": {
+          "hl": "en",
+          "cat": "0",
+          "date": "today 12-m"
+        },
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        -832,
+        -32
+      ],
+      "id": "196500b0-3526-4c98-a454-4fa5d4ab1e8d",
+      "name": "Google_trends search",
+      "credentials": {
+        "serpApi": {
+          "id": "xLy5p6beWWnzcOEY",
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-3.5-turbo-16k",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1184,
+        160
+      ],
+      "id": "f9b630a7-32f8-46a9-a9ff-0217c4506c3e",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "l1pDwg7FUjdLudHZ",
+          "name": "OpenRouter account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "google_news",
+        "q": "={{ $json.output }}",
+        "additionalFields": {
+          "hl": "en"
+        },
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        -32
+      ],
+      "id": "99b208b6-920b-4288-aecd-f74ea63dee97",
+      "name": "Google_news search",
+      "credentials": {
+        "serpApi": {
+          "id": "xLy5p6beWWnzcOEY",
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the incoming SERP API Trends data\nconst trendsData = $json.interest_over_time?.timeline_data || [];\n\n// Flatten and clean data\nconst cleaned = trendsData.map(item => ({\n  date: item.date || null,\n  query: item.values?.[0]?.query || null,\n  value: item.values?.[0]?.value || 0\n}));\n\n// Sort by value (descending) and take top 3\nconst top3 = cleaned.sort((a, b) => b.value - a.value).slice(0, 3);\n\nreturn [\n  {\n    json: {\n      top_trends: top3\n    }\n  }\n];\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        -32
+      ],
+      "id": "44fa0b78-6394-4afd-a02a-e1bb0e0f9968",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-3.5-turbo-16k",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        160
+      ],
+      "id": "4ed03547-dd9d-4cd4-aca9-84194a1d8e2f",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "lOqmjIo3j2jFpal7",
+          "name": "OpenRouter account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the full news response from the input\nconst newsData = $json.news_results || [];\n\n// Take only the first 3 results\nconst top3News = newsData.slice(0, 3).map(item => ({\n  position: item.position || null,\n  title: item.title || null,\n  source: item.source?.name || null,\n  \n  link: item.link || null,\n  thumbnail: item.thumbnail || null,\n  date: item.date || null\n}));\n\n// Return cleaned results\nreturn [\n  {\n    json: {\n      top_3_news: top3News\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        -32
+      ],
+      "id": "11ca6911-c32a-4a87-91a9-b994f350777d",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-3.5-turbo-16k",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        352,
+        160
+      ],
+      "id": "35c89dbf-90c7-4052-a11b-186eac6b3e9f",
+      "name": "OpenRouter Chat Model2",
+      "credentials": {
+        "openRouterApi": {
+          "id": "lOqmjIo3j2jFpal7",
+          "name": "OpenRouter account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "apprao6VteOIQ6amd",
+          "mode": "list",
+          "cachedResultName": "n8n_tetsing",
+          "cachedResultUrl": "https://airtable.com/apprao6VteOIQ6amd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0NJpgDWoCudzkC",
+          "mode": "list",
+          "cachedResultName": "Table 3",
+          "cachedResultUrl": "https://airtable.com/apprao6VteOIQ6amd/tbl0NJpgDWoCudzkC"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title_Name', ``, 'string') }}",
+            "Generated Content": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Generated_Content', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Topic Name"
+          ],
+          "schema": [
+            {
+              "id": "Title Name",
+              "displayName": "Title Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Generated Content",
+              "displayName": "Generated Content",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        496,
+        160
+      ],
+      "id": "1b4b3dec-e6f8-4bfc-a66a-545cb182e9cb",
+      "name": "Create a record in Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "eUeRGdDoEP8TLhtZ",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=title 01 \n{{ $json.top_3_news[0].title }}\ntitle 02\n{{ $json.top_3_news[1].title }}\ntitle 03\n{{ $json.top_3_news[2].title }}",
+        "options": {
+          "systemMessage": "=you have given three titles now this titles are top 3 news for this key word {{ $('Topic generator').item.json.output }} now your task is to create a title for this word and write a blog on to it so it can be publish blog title and its content should be simple and effcient for seo.\n\nAfter determining the Title Name and Generated Content, save the Title Name and Generated Content into Airtable using the Airtable integration connected to your tools. Store it in the \"Title Name\" and \"Generated Content\"field of the designated table.\n\noutput only the title name and generated content and keep saving data in airtable on background\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        -32
+      ],
+      "id": "0d312003-e0e4-4ec7-b902-cf0850831791",
+      "name": "Content writer"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You have to create a query",
+        "options": {
+          "systemMessage": "=You are a helpful assistant.In which your task is to find out the most useful keyword from here {{ JSON.stringify($json.top_trends, null, 2) }} and create the query out of it.\noutput \n\nJSON \"\"\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -528,
+        -32
+      ],
+      "id": "e30ab963-6a1d-463d-af00-00663c961c5d",
+      "name": "Query generator"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are a helpful assistant.\nYour task is:\n\nWhen the user asks for ideas (e.g., \"what should I write today\"), respond only with a single topic name such as \"AI\", \"Climate Change\", \"Blockchain\", etc. No extra text, no explanation.\n\n\n\nFollow this behavior for all similar queries about topics to write, post, or research."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1184,
+        -32
+      ],
+      "id": "f6449c9a-66b0-44dc-aa15-409ca39d6305",
+      "name": "Topic generator"
+    },
+    {
+      "parameters": {
+        "title": "={{ $json['Title Name'] }}",
+        "additionalFields": {
+          "content": "={{ $json['Generated Content'] }}"
+        }
+      },
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        304
+      ],
+      "id": "b520d3e1-fc57-46ee-bc4e-9cdc871cac03",
+      "name": "Create a post",
+      "credentials": {
+        "wordpressApi": {
+          "id": "lwhCUfLvGiG1kKOJ",
+          "name": "Wordpress account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "apprao6VteOIQ6amd",
+          "mode": "list",
+          "cachedResultName": "n8n_tetsing",
+          "cachedResultUrl": "https://airtable.com/apprao6VteOIQ6amd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0NJpgDWoCudzkC",
+          "mode": "list",
+          "cachedResultName": "Table 3",
+          "cachedResultUrl": "https://airtable.com/apprao6VteOIQ6amd/tbl0NJpgDWoCudzkC"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -640,
+        304
+      ],
+      "id": "0e74bc84-995b-48f3-87a1-9a8df2d0f61e",
+      "name": "Search records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "eUeRGdDoEP8TLhtZ",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Topic generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Topic generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google_trends search": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google_news search": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Query generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Query generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Content writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Content writer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record in Airtable": {
+      "ai_tool": [
+        [
+          {
+            "node": "Content writer",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query generator": {
+      "main": [
+        [
+          {
+            "node": "Google_news search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Topic generator": {
+      "main": [
+        [
+          {
+            "node": "Google_trends search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content writer": {
+      "main": [
+        []
+      ]
+    },
+    "Search records": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

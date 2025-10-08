@@ -1,0 +1,290 @@
+{
+  "name": "handle pdf",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1776,
+        -256
+      ],
+      "id": "7e5d1cd4-71da-4e31-a082-0e3b9bea5f63",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1D93dw6y47givecNBicenq86j0lsOjIhc",
+          "mode": "list",
+          "cachedResultName": "tsla-20250129-gen.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1D93dw6y47givecNBicenq86j0lsOjIhc/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1280,
+        -256
+      ],
+      "id": "b77f4371-9d91-410b-95c9-d98921374a1e",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "FnZcujJ4Egbxdk4H",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://content.airtable.com/v0/appsrCg5gjJ9iCVta/{{ $('Search records').item.json.id }}/pdf/uploadAttachment",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contentType",
+              "value": "={{ $json.contentType }}"
+            },
+            {
+              "name": "file",
+              "value": "={{ $json.attachment }}"
+            },
+            {
+              "name": "filename",
+              "value": "={{ $json.filename }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -208,
+        -320
+      ],
+      "id": "154ab12f-1e82-4b3b-8144-29958193bd96",
+      "name": "Upload Image to Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "eUeRGdDoEP8TLhtZ",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appsrCg5gjJ9iCVta",
+          "mode": "list",
+          "cachedResultName": "n8n_tetsing (Copy)",
+          "cachedResultUrl": "https://airtable.com/appsrCg5gjJ9iCVta"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0NJpgDWoCudzkC",
+          "mode": "list",
+          "cachedResultName": "Table 3",
+          "cachedResultUrl": "https://airtable.com/appsrCg5gjJ9iCVta/tbl0NJpgDWoCudzkC"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -1472,
+        -256
+      ],
+      "id": "5e55b711-5a2a-4d71-b95e-ee8c5b87ebd8",
+      "name": "Search records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "eUeRGdDoEP8TLhtZ",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "returnAll": true,
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1664,
+        -624
+      ],
+      "id": "d9afc69d-b0c2-45d4-80bb-046e57a49cc1",
+      "name": "Search files and folders",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "FnZcujJ4Egbxdk4H",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "destinationKey": "attachment",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        -176
+      ],
+      "id": "45c788bf-56b1-4d04-87f8-3fe9124a4087",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0e6b17aa-746d-485a-9583-385ddd6ea5a3",
+              "name": "contentType",
+              "value": "={{ $binary.data.mimeType }}",
+              "type": "string"
+            },
+            {
+              "id": "d6950397-a9f9-486f-be4b-cf3603098d38",
+              "name": "filename",
+              "value": "={{ $binary.data.fileName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -784,
+        -416
+      ],
+      "id": "caa77487-5770-4537-a609-1c2082aa66e7",
+      "name": "Get attachment metadata"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -464,
+        -320
+      ],
+      "id": "406352f7-5b00-4c4d-855a-bbfdc51b679b",
+      "name": "Merge"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Get attachment metadata",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        []
+      ]
+    },
+    "Upload Image to Airtable": {
+      "main": [
+        []
+      ]
+    },
+    "Get attachment metadata": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Upload Image to Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

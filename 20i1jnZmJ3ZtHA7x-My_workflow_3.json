@@ -1,0 +1,207 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -912,
+        -80
+      ],
+      "id": "efb6381b-b2e0-468e-9b16-060e5409bc3a",
+      "name": "When chat message received",
+      "webhookId": "1e94c0fb-5d80-43b8-9073-017b88a0e655"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are a helpful assistant that suggests real, working RSS feed URLs based on the topic the user wants to get articles about.\n\nYour task:\n\nUnderstand the topic the user provides (e.g., football, AI, stocks, entertainment).\n\nReturn two JSON objects:\n\nThe first contains a valid, working RSS feed URL that can be read by tools like RSS readers or automation platforms (e.g., n8n).\n\nThe second contains relevant article keywords that match the user’s topic.\n\n✅ Ensure:\n\nThe RSS feed is valid XML and accessible in browsers (e.g., ends in .rss or .xml, or has fmt=rss).\n\nThe URL actually exists and works.\n\nOnly provide official sources like:\n\nBBC: https://feeds.bbci.co.uk/news/rss.xml\n\nTechCrunch: https://techcrunch.com/feed/\n\nNYTimes: https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml\n\nSky Sports: https://www.skysports.com/rss/12040\n\nESPN: https://www.espn.com/espn/rss/news\n\n❌ Do not generate fake or random-looking URLs — only provide legitimate and known RSS URLs."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -432,
+        -96
+      ],
+      "id": "3de7ab5e-b809-4a6b-9c66-40ba086b50ac",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -464,
+        160
+      ],
+      "id": "1c7e02bf-a2fa-4a59-917f-1590e38927aa",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "LsOVhpjqmWUL8pFT",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -336,
+        144
+      ],
+      "id": "6d092632-d168-48fc-bbbb-73f4dcabb009",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input data\nconst input = $input.first().json;\n\n// Parse the stringified JSON inside `output`\nconst parsed = JSON.parse(input.output);\n\n// Extract URL and keywords\nconst url = parsed.url;\nconst keywords = parsed.article_keywords;\n\n// Return two separate outputs\nreturn [\n  {\n    json: {\n      type: \"url\",\n      value: url\n    }\n  },\n  {\n    json: {\n      type: \"keywords\",\n      value: keywords\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        -95.796875
+      ],
+      "id": "2300029b-358d-42fd-8a9c-8f2631a3bb6e",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.value }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        -96
+      ],
+      "id": "ab098f1c-89f1-4f9e-9c15-ba6b96e3d6e8",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        48
+      ],
+      "id": "02ffc077-6a58-4abe-a02c-b12f27ec1852",
+      "name": "Code1"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {
+    "AI Agent": [
+      {
+        "json": {
+          "output": "{\n  \"url\": \"https://cointelegraph.com/rss\",\n  \"article_keywords\": [\"cryptocurrency\", \"bitcoin\", \"blockchain\", \"crypto news\", \"decentralized finance\", \"DeFi\", \"crypto market\", \"Ethereum\", \"NFTs\", \"crypto trading\", \"digital assets\"]\n}"
+        }
+      }
+    ],
+    "Code": [
+      {
+        "json": {
+          "type": "url",
+          "value": "https://cointelegraph.com/rss"
+        }
+      },
+      {
+        "json": {
+          "type": "keywords",
+          "value": [
+            "cryptocurrency",
+            "bitcoin",
+            "blockchain",
+            "crypto news",
+            "decentralized finance",
+            "DeFi",
+            "crypto market",
+            "Ethereum",
+            "NFTs",
+            "crypto trading",
+            "digital assets"
+          ]
+        }
+      }
+    ]
+  },
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

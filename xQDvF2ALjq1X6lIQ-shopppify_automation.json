@@ -1,0 +1,363 @@
+{
+  "name": "shopppify automation",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -848,
+        -64
+      ],
+      "id": "fa84a82f-b846-4041-9849-e0ae9944b5da",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "eRiI99u4SITXibOs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.snippet }}",
+        "options": {
+          "systemMessage": "=You are a helpful assistant that identifies the product the sender wants from our Shopify store and outputs the details in this exact format:\n\nProduct Name: <exact name from user, keep original formatting including dashes, dots, or numbers>\nquery: <the main question or request about the product>\naction: <what the user wants — purchasing, just details, or something else>\n\nRules:\n1. Always capture the product name exactly as the user provides it, without removing dashes, dots, or numbers.\n2. Do not \"prettify\" or change the case of the product name — keep it exactly as given.\n3. Only fill in the \"action\" field with one of:\n   - purchasing\n   - just details\n   - something else\n\n\nExample Input:\n\"I want to buy reebok-mens-classic-edge-4-0-shoe-copy\"\n\nExample Output:\nProduct Name: reebok-mens-classic-edge-4-0-shoe-copy\nquery: I want to buy this product\naction: purchasing\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -640,
+        -64
+      ],
+      "id": "e5669572-c001-4fab-815d-eb66a39f0252",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get input (replace 'output' with your actual field name if different)\nconst text = $input.first().json.output;\n\n// Regex to match case-insensitive and allow newlines\nconst productMatch = text.match(/Product Name:\\s*(.+?)\\s*(?:Query:|query:)/is);\nconst queryMatch = text.match(/Query:\\s*(.+?)\\s*(?:Action:|action:)/is);\nconst actionMatch = text.match(/Action:\\s*(.+)$/is);\n\n// Return as separate fields\nreturn [\n  {\n    json: {\n      productName: productMatch ? productMatch[1].trim() : null,\n      query: queryMatch ? queryMatch[1].trim() : null,\n      action: actionMatch ? actionMatch[1].trim() : null\n    }\n  }\n];\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        -64
+      ],
+      "id": "e196c870-c133-4069-83d4-0a5e1363de7f",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=If {{ $json.data }} has product info, email {{ $('Gmail Trigger').item.json.From }} confirming availability with title, price, and key details. If empty, send an apology with one alternative product suggestion.\n\n",
+        "options": {
+          "systemMessage": "=You are a helpful assistant. If data is received from the HTTP node, send an email to the user from the trigger node confirming we have the product and include all relevant details available (title, price, description, features, etc.). If no data or an error occurs, send a polite apology email and suggest one alternative product from our store. Use the Gmail tool to send the email.\n\nkeep in mind either you send a availabilty message or applogy not two message at a time and send only for once"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        -256
+      ],
+      "id": "8aeb4b6b-46b3-4270-93b3-adf17005eb33",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "url": "=https://ypfzfi-xf.myshopify.com/products/{{ $json.productName }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Shopify-Access-Token",
+              "value": "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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -112,
+        -96
+      ],
+      "id": "d0175b03-9338-4633-94db-5ebca1421ccd",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        864,
+        64
+      ],
+      "id": "9c6d851c-c92b-4098-8fbc-920f23f362cd",
+      "name": "Send a message in Gmail",
+      "webhookId": "973afd25-87c0-4979-aae9-6cf8be4f67d3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "eRiI99u4SITXibOs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-3.5-turbo-16k",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        160
+      ],
+      "id": "d1ce0513-d803-469a-9d8d-3394a66d3b97",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "lOqmjIo3j2jFpal7",
+          "name": "OpenRouter account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-3.5-turbo-16k",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        656,
+        112
+      ],
+      "id": "5a63aacc-aa59-4f99-907c-b69557095a36",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "lOqmjIo3j2jFpal7",
+          "name": "OpenRouter account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const html = $json.data || \"\";\n\n// Helper to decode HTML entities\nfunction decodeHTMLEntities(text) {\n  return text.replace(/&#(\\d+);/g, (_, dec) => String.fromCharCode(dec))\n             .replace(/&quot;/g, '\"')\n             .replace(/&amp;/g, '&')\n             .replace(/&lt;/g, '<')\n             .replace(/&gt;/g, '>')\n             .replace(/&#39;/g, \"'\");\n}\n\n// Extract title from <div class=\"product__title\"><h1>...</h1></div>\nconst titleMatch =  html.match(/<div[^>]*class=[\"']?product__title[\"']?[^>]*>[\\s\\S]*?<h1[^>]*>([\\s\\S]*?)<\\/h1>/i);\n\nconst title = titleMatch ? decodeHTMLEntities(titleMatch[1].replace(/<[^>]*>/g, '').trim()) : null;\n\n// Extract price\nconst priceMatch = html.match(/<span class=\"price-item[^>]*>([\\s\\S]*?)<\\/span>/i);\nconst price = priceMatch ? decodeHTMLEntities(priceMatch[1].replace(/<[^>]*>/g, '').trim()) : null;\n\n// Extract description\nconst descMatch = html.match(/<div class=\"product__description[^>]*>([\\s\\S]*?)<\\/div>/i);\nconst description = descMatch ? decodeHTMLEntities(descMatch[1].replace(/<[^>]*>/g, '').trim()) : null;\n\nreturn [\n  { json: { title } },\n  { json: { price } },\n  { json: { description } }\n];\n\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        -96
+      ],
+      "id": "bb7080f1-2da8-4716-bc0f-7b5d136184e8",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "authentication": "accessToken",
+        "additionalFields": {},
+        "limeItemsUi": {
+          "lineItemValues": [
+            {
+              "productId": "=Reebok Men's Classic Edge 4.0 Shoe (Copy)",
+              "variantId": "8131259793602",
+              "grams": "250",
+              "price": "=25000"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.shopify",
+      "typeVersion": 1,
+      "position": [
+        400,
+        112
+      ],
+      "id": "1cc239b5-3c2d-4e19-a60b-edca7019189f",
+      "name": "Create an order",
+      "credentials": {
+        "shopifyAccessTokenApi": {
+          "id": "rbt7qe2XQAGQTDds",
+          "name": "Shopify Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "029f2dd2-1dc5-453c-a91c-a6fe627955a0",
+              "leftValue": "={{ $('Code').item.json.action.toLowerCase() }}\n",
+              "rightValue": "details",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        -128
+      ],
+      "id": "58a4a720-e2c0-4949-86ee-bd5edeff7449",
+      "name": "If"
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create an order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

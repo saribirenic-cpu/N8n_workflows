@@ -1,0 +1,123 @@
+{
+  "name": "redit post workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        64
+      ],
+      "id": "96118bec-e734-4de0-a888-9220cad59795",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ads-api.reddit.com/api/v3/profiles/Professional_Cow1675/posts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 123"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"data\": {\n    \"allow_comments\": true,\n    \"body\": \"This is the body of the example post.\",\n    \"content\": [\n      {\n        \"call_to_action\": \"Apply Now\",\n        \"caption\": \"This is the caption for the image.\",\n        \"destination_url\": \"https://example.com\",\n        \"display_url\": \"https://example.com\",\n        \"media_url\": \"https://example.com/image.jpg\"\n      }\n    ],\n    \"headline\": \"Example post\",\n    \"is_richtext\": true,\n    \"thumbnail_url\": \"https://example.com/image.jpg\",\n    \"type\": \"CAROUSEL\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -928,
+        -1344
+      ],
+      "id": "f3cb6339-fe9f-4a19-af07-598e43959ab7",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "subreddit": "n8n",
+        "limit": 1,
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        64
+      ],
+      "id": "86ca574b-787f-4e18-b9ad-f563fcfae46d",
+      "name": "Get many posts",
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "1Vejcpr9raBPBrZ8",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "postComment",
+        "postId": "={{ $json.id }}",
+        "commentText": "it is great invention"
+      },
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [
+        64,
+        64
+      ],
+      "id": "5ae35fc7-be63-4ba9-8bd3-3c2a6431240d",
+      "name": "Create a comment in a post",
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "1Vejcpr9raBPBrZ8",
+          "name": "Reddit account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get many posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many posts": {
+      "main": [
+        [
+          {
+            "node": "Create a comment in a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

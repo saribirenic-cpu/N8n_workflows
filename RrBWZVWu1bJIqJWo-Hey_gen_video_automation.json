@@ -1,0 +1,352 @@
+{
+  "name": "Hey gen video automation",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "openai/gpt-3.5-turbo-16k",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1272,
+        136
+      ],
+      "id": "fb41eefb-c2ab-4f7a-b5b6-f1f3c64acd8c",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "l1pDwg7FUjdLudHZ",
+          "name": "OpenRouter account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a5c39d22-d074-4dca-89e8-0cc9936251a1",
+              "leftValue": "={{ $json.data.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        -160
+      ],
+      "id": "54ad6100-7c9c-4cfa-a728-8eeb334672f1",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -768,
+        -144
+      ],
+      "id": "19e64398-a48a-4a39-9ca7-b9ca575e3090",
+      "name": "Wait",
+      "webhookId": "5b2708d7-8d46-453c-aa97-c33a38aaa863"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1568,
+        -80
+      ],
+      "id": "dcdb92ac-4fb5-41fc-915d-17598a997db2",
+      "name": "Telegram Trigger",
+      "webhookId": "e83891fc-a12a-4456-aaf5-afbb89cd60fc",
+      "credentials": {
+        "telegramApi": {
+          "id": "f0SNuyCPhmIjFgqb",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "file": "={{ $json.data.video_url }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -96,
+        -208
+      ],
+      "id": "e5aacf8b-3453-455c-9afe-af7b4cde7729",
+      "name": "Send a video",
+      "webhookId": "731c47f2-c8d2-4432-aceb-60c7cb32e58a",
+      "credentials": {
+        "telegramApi": {
+          "id": "f0SNuyCPhmIjFgqb",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -1344,
+        -88
+      ],
+      "id": "4eda4a48-5df1-4819-8766-f4457d7d4796",
+      "name": "Text Generator"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.heygen.com/v2/video/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "MDRlNDk5ZDE5Y2U2NDkzZDhjYTM5NjM5MjIwZDFkMjUtMTc1NTUwNzQ0Nw=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"video_inputs\": [\n    {\n      \"character\": {\n        \"type\": \"avatar\",\n        \"avatar_id\": \"Abigail_standing_office_front\",\n        \"avatar_style\": \"normal\"\n      },\n      \"voice\": {\n        \"type\": \"text\",\n        \"input_text\": \"{{ $json.text }}\",\n        \"voice_id\": \"119caed25533477ba63822d5d1552d25\",\n        \"speed\": 1.1\n      }\n    }\n  ],\n  \"dimension\": {\n    \"width\": 1280,\n    \"height\": 720\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -992,
+        -88
+      ],
+      "id": "c41abcf5-5441-4472-8319-0470f013b9cb",
+      "name": "Video generator"
+    },
+    {
+      "parameters": {
+        "url": "https://api.heygen.com/v1/video_status.get",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "video_id",
+              "value": "={{ $item(\"0\").$node[\"Video generator\"].json[\"data\"][\"video_id\"] }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "MDRlNDk5ZDE5Y2U2NDkzZDhjYTM5NjM5MjIwZDFkMjUtMTc1NTUwNzQ0Nw=="
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -560,
+        -128
+      ],
+      "id": "32268371-b8a0-4108-982c-443c369eb9a1",
+      "name": "Get video"
+    }
+  ],
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Text Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Generator": {
+      "main": [
+        [
+          {
+            "node": "Video generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video generator": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get video": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {
+    "Telegram Trigger": [
+      {
+        "json": {
+          "update_id": 87074540,
+          "message": {
+            "message_id": 17,
+            "from": {
+              "id": 6134888287,
+              "is_bot": false,
+              "first_name": "Sarib",
+              "last_name": "Memon",
+              "language_code": "en"
+            },
+            "chat": {
+              "id": 6134888287,
+              "first_name": "Sarib",
+              "last_name": "Memon",
+              "type": "private"
+            },
+            "date": 1755583422,
+            "text": "Write a one line joke on fatty guy only write in one line no line change nothing"
+          }
+        }
+      }
+    ],
+    "Text Generator": [
+      {
+        "json": {
+          "text": "Why did the fatty guy bring a ladder to the bar? He heard the drinks were on the house!"
+        }
+      }
+    ],
+    "Video generator": [
+      {
+        "json": {
+          "error": null,
+          "data": {
+            "video_id": "5b8e0ae4d01e48d89fca892dd4aefce0"
+          }
+        }
+      }
+    ],
+    "Get video": [
+      {
+        "json": {
+          "code": 100,
+          "data": {
+            "callback_id": null,
+            "caption_url": "",
+            "created_at": 1755583432,
+            "duration": 4.716,
+            "error": null,
+            "gif_url": "https://resource2.heygen.ai/video/5b8e0ae4d01e48d89fca892dd4aefce0/gif.gif",
+            "id": "5b8e0ae4d01e48d89fca892dd4aefce0",
+            "status": "completed",
+            "thumbnail_url": "https://files2.heygen.ai/aws_pacific/avatar_tmp/04e499d19ce6493d8ca39639220d1d25/5b8e0ae4d01e48d89fca892dd4aefce0.jpeg?Expires=1756188392&Signature=S0R7-KaCm1R5OGPSNX~jl9WiqlcS7-ia64mqU-VcUL5hFrIJIK4Pah8uPVmlIyrbQnRPcRSOPatmDZpUeqCZvqHOppAwsRVFzp50C-YbI~e2jHZem9o3AxKKMIeXnHoQ6B-Kfsuj0keyP6F8u6RZVWrvJgf8iU1GmHx0weWMIJO8e5~pg3PqNKqOogSt7QlpaGWTjuy4tQtbCQ6dkv7wubgTmjW4KJFZpJpYKQvIoYEDkKk6aSFx8Ttt4JVIj9HeBnaY6lcKsR2U1HS3WjDsUqKqWINyj2XwJBNVHMZrCuOOtShcLrNxCShMMHM8OZek9DCXnxs29xUv10OKY8l06Q__&Key-Pair-Id=K38HBHX5LX3X2H",
+            "video_url": "https://files2.heygen.ai/aws_pacific/avatar_tmp/04e499d19ce6493d8ca39639220d1d25/5b8e0ae4d01e48d89fca892dd4aefce0.mp4?Expires=1756188392&Signature=HRztxhYmAbQRNfGxrhg5xVfqlMI4gZIDAllV9guXmHBewdKZ7j1HQKFNi1j6fGa9Wk39ComR6JcKfxPrtOxgwAut1tUuzJ6nAzm7Zn1TdzSCDglZa1~om2aJD33DhQAqhso2s5EkpXxUJByMDFmFE4~GujfDJi~Byb9fBYvR0WVERopF8aEZ2-mbHuA0ynaCWQQWVIbNYu31V0US9-0WnkO0QeZvhRPcMd0U~axxko6R1PVAbXrysdGhdbF3USPN6R6B1lcCchBlO9pArUxjcgz652dl0lrza2wq09m2vDyMkBDytSXcy5Q7Kib6hjJ2npdR4yX1-JSgbuE0DD~aAQ__&Key-Pair-Id=K38HBHX5LX3X2H",
+            "video_url_caption": null
+          },
+          "message": "Success"
+        }
+      }
+    ]
+  },
+  "triggerCount": 1,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

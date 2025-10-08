@@ -1,0 +1,322 @@
+{
+  "name": "automate wordpress posting",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "apprao6VteOIQ6amd",
+          "mode": "list",
+          "cachedResultName": "n8n_tetsing",
+          "cachedResultUrl": "https://airtable.com/apprao6VteOIQ6amd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0NJpgDWoCudzkC",
+          "mode": "list",
+          "cachedResultName": "Table 3",
+          "cachedResultUrl": "https://airtable.com/apprao6VteOIQ6amd/tbl0NJpgDWoCudzkC"
+        },
+        "filterByFormula": "=SEARCH(\"{{ $json.titleToCheck }}\", {Title Name})",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -480,
+        112
+      ],
+      "id": "0405d742-33ba-49a1-b7a2-4c72c70cd0c2",
+      "name": "Search records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "eUeRGdDoEP8TLhtZ",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -688,
+        112
+      ],
+      "id": "d8fe7676-332c-4387-bdc7-4ced6d1588f5",
+      "name": "When chat message received",
+      "webhookId": "9b68a565-d5ae-4ba9-9102-e6c2abc06a66"
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = $input.first().json['Generated Content'] || \"\";\nconst wordCount = content.trim().split(/\\s+/).length;\nreturn [{\n  ...$json,\n  wordCount,\n  wordCountPass: wordCount >= 40\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        112
+      ],
+      "id": "f14fa1a9-2dac-4f10-aa03-48e0bcb8ea26",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Check if the blog meets SEO rules:\n- Keyword in title & H1\n- Meta description present\n- Uses H2/H3\n- Keyword in first 150 words\n- Keyword density 1-3%\n- Length ≥ 2500 words\n\nKeyword: {{ $item(\"0\").$node[\"Search records\"].json[\"Title Name\"] }}\nContent: {{ $item(\"0\").$node[\"Search records\"].json[\"Generated Content\"] }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an SEO checker. Return only \"PASS\" or \"FAIL\". and with the bullet point why it is PASS or Faik this should be two different output"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -928,
+        464
+      ],
+      "id": "cf7c2233-4d92-4aff-a0fa-3abcc1346c88",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-3.5-turbo-16k",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        544
+      ],
+      "id": "7d7c462b-a435-4670-8c36-ffcbcc2ab2cd",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "l1pDwg7FUjdLudHZ",
+          "name": "OpenRouter account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4b0ba95a-4c40-4e9e-9c0d-681c4e661d4f",
+              "leftValue": "={{ $item(\"0\").$node[\"Code\"].json[\"wordCountPass\"] }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": "",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -16,
+        112
+      ],
+      "id": "03b1ee77-73dc-4c76-a3c2-fea33a0cacf5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://shakeyos.ai/wp-json/wp/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"title\": \"My SEO Optimized Blog Post\",\n  \"content\": \"Here is the full blog post content...\",\n  \"slug\": \"my-seo-blog-post\",\n  \"status\": \"publish\",\n  \"meta\": {\n    \"_yoast_wpseo_metadesc\": \"This is my SEO meta description.\",\n    \"_yoast_wpseo_focuskw\": \"focus keyword here\"\n  }\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        32,
+        464
+      ],
+      "id": "a45b41c1-d2d6-4cb2-86f5-3e38bda87175",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "KzhHBKTzUXoHbzP4",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "title": "={{ $item(\"0\").$node[\"If\"].json[\"Title Name\"] }}",
+        "additionalFields": {
+          "content": "={{ $item(\"0\").$node[\"If\"].json[\"Generated Content\"] }}",
+          "slug": ""
+        }
+      },
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        320,
+        96
+      ],
+      "id": "80fcda12-2c38-416d-8152-9f7f5fe98ddc",
+      "name": "Create a post",
+      "credentials": {
+        "wordpressApi": {
+          "id": "lwhCUfLvGiG1kKOJ",
+          "name": "Wordpress account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://shakeyos.ai/wp-json/wp/v2/posts/{{ $json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "wordpressApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"yoast_meta\": {\n    \"meta_desc\": \"My SEO meta description here\",\n    \"focus_kw\": \"My target keyword\"\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        528,
+        96
+      ],
+      "id": "d26a419a-994d-4b1f-bee0-49115b666433",
+      "name": "HTTP Request1",
+      "credentials": {
+        "wordpressApi": {
+          "id": "lwhCUfLvGiG1kKOJ",
+          "name": "Wordpress account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Create a post": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
