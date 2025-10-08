@@ -1,7 +1,7 @@
 {
-  "createdAt": "2025-08-07T10:49:05.430Z",
-  "updatedAt": "2025-08-08T08:03:34.000Z",
-  "id": "8gpiIosUJU7PkDhK",
+  "createdAt": "2025-09-29T07:55:53.050Z",
+  "updatedAt": "2025-09-29T08:40:01.000Z",
+  "id": "I2lO6aDVRoLkwwJO",
   "name": "automated video combine",
   "active": false,
   "isArchived": false,
@@ -11,10 +11,10 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -1616,
-        -432
+        -288,
+        176
       ],
-      "id": "24e3d23e-ca59-475b-bc0c-37e6eca974b2",
+      "id": "0c5e4f25-f5be-4387-aad6-10c2751a864c",
       "name": "When clicking ‘Execute workflow’"
     },
     {
@@ -24,38 +24,79 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        224,
-        -480
+        1552,
+        128
       ],
-      "id": "926724fd-ea96-4d13-a58f-8d1177c2ad22",
+      "id": "9aece326-12cf-4344-85ea-1a5fcc90663c",
       "name": "Execute Command"
     },
     {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        656,
+        128
+      ],
+      "id": "73ceea99-fdb9-4867-9011-8a9dfc129d1e",
+      "name": "Merge"
+    },
+    {
       "parameters": {
-        "operation": "download",
-        "fileId": {
-          "__rl": true,
-          "value": "1XLqf3M27aKOPyFjlMGAFFUudIys9eEPV",
-          "mode": "list",
-          "cachedResultName": "119289-717336867_small.mp4",
-          "cachedResultUrl": "https://drive.google.com/file/d/1XLqf3M27aKOPyFjlMGAFFUudIys9eEPV/view?usp=drivesdk"
-        },
+        "operation": "write",
+        "fileName": "/data/shared/sarib/saying-thank-you-238588.mp3",
         "options": {}
       },
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
       "position": [
-        -1328,
-        -320
+        320,
+        0
       ],
-      "id": "fea5df4f-2bdd-40e4-a625-10b164a19e29",
-      "name": "Download file",
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "AnfwAjxNrfLJbZz4",
-          "name": "Google Drive account 8"
-        }
-      }
+      "id": "e27062ef-008e-4d97-a5bd-f0ec8fa143f3",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/data/shared/sarib/119289-717336867_small.mp4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        336,
+        272
+      ],
+      "id": "5028351b-1eaa-414c-91fd-d04d3251684b",
+      "name": "Read/Write Files from Disk1"
+    },
+    {
+      "parameters": {
+        "command": "=ffmpeg -i /data/shared/sarib/119289-717336867_small.mp4 -i /data/shared/sarib/saying-thank-you-238588.mp3 -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 \"/data/shared/sarib/merged-output.mp4\"\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        944,
+        128
+      ],
+      "id": "a83189c5-7b0b-4d18-9190-6d69812f6c89",
+      "name": "Execute Command1"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/data/shared/sarib/merged-output.mp4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        128
+      ],
+      "id": "4862bbac-6d88-4b9b-a9a2-60f2b7f90fb8",
+      "name": "Read/Write Files from Disk2"
     },
     {
       "parameters": {
@@ -72,11 +113,11 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        -1328,
-        -608
+        0,
+        0
       ],
-      "id": "cccd0516-685e-4e64-a5a4-b50cac48cb9c",
-      "name": "Download file1",
+      "id": "cb996fcf-51c3-441d-971c-86f972be0d5a",
+      "name": "Getting Audio File",
       "credentials": {
         "googleDriveOAuth2Api": {
           "id": "AnfwAjxNrfLJbZz4",
@@ -85,72 +126,44 @@
       }
     },
     {
-      "parameters": {},
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        -672,
-        -480
-      ],
-      "id": "0e77466b-fffb-41a2-99cd-6ffa4b95bdbe",
-      "name": "Merge"
-    },
-    {
       "parameters": {
-        "operation": "write",
-        "fileName": "/data/shared/sarib/saying-thank-you-238588.mp3",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1XLqf3M27aKOPyFjlMGAFFUudIys9eEPV",
+          "mode": "list",
+          "cachedResultName": "119289-717336867_small.mp4",
+          "cachedResultUrl": "https://drive.google.com/file/d/1XLqf3M27aKOPyFjlMGAFFUudIys9eEPV/view?usp=drivesdk"
+        },
         "options": {}
       },
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
       "position": [
-        -1008,
-        -608
+        0,
+        288
       ],
-      "id": "8cf124bd-e6ba-4221-ab55-162bcfc344ea",
-      "name": "Read/Write Files from Disk"
+      "id": "fefa8936-5628-4e95-bf4b-3ce206757457",
+      "name": "Getting video file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AnfwAjxNrfLJbZz4",
+          "name": "Google Drive account 8"
+        }
+      }
     },
     {
       "parameters": {
-        "operation": "write",
-        "fileName": "/data/shared/sarib/119289-717336867_small.mp4",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1,
-      "position": [
-        -992,
-        -336
-      ],
-      "id": "e420e8bf-988c-43cc-aaa7-3c917769023a",
-      "name": "Read/Write Files from Disk1"
-    },
-    {
-      "parameters": {
-        "command": "=ffmpeg -i /data/shared/sarib/119289-717336867_small.mp4 -i /data/shared/sarib/saying-thank-you-238588.mp3 -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 \"/data/shared/sarib/merged-output.mp4\"\n"
+        "command": "mkdir -p /data/shared/sarib\n"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -384,
-        -480
+        1088,
+        -688
       ],
-      "id": "bdeccc6a-37c1-4c52-a9ef-8e76b54d2266",
-      "name": "Execute Command1"
-    },
-    {
-      "parameters": {
-        "fileSelector": "/data/shared/sarib/merged-output.mp4",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1,
-      "position": [
-        -80,
-        -480
-      ],
-      "id": "89824a12-541c-40f4-837a-8922d390e528",
-      "name": "Read/Write Files from Disk2"
+      "id": "943ae099-4ebf-44e4-ab79-f424e5569b0d",
+      "name": "Execute Command2"
     }
   ],
   "connections": {
@@ -158,34 +171,12 @@
       "main": [
         [
           {
-            "node": "Download file1",
+            "node": "Getting Audio File",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Download file",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Download file1": {
-      "main": [
-        [
-          {
-            "node": "Read/Write Files from Disk",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Download file": {
-      "main": [
-        [
-          {
-            "node": "Read/Write Files from Disk1",
+            "node": "Getting video file",
             "type": "main",
             "index": 0
           }
@@ -246,24 +237,49 @@
           }
         ]
       ]
+    },
+    "Getting Audio File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Getting video file": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        []
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
+  "meta": null,
   "pinData": {},
-  "versionId": "22a9ca44-fc46-4850-a9d7-1745d5d45482",
+  "versionId": "c7d31048-d693-4caa-b3a5-dc750d46a946",
   "triggerCount": 0,
   "shared": [
     {
-      "createdAt": "2025-08-07T10:49:05.437Z",
-      "updatedAt": "2025-08-07T10:49:05.437Z",
+      "createdAt": "2025-09-29T07:55:53.059Z",
+      "updatedAt": "2025-09-29T07:55:53.059Z",
       "role": "workflow:owner",
-      "workflowId": "8gpiIosUJU7PkDhK",
+      "workflowId": "I2lO6aDVRoLkwwJO",
       "projectId": "zHjIixMuDBpDICPD"
     }
   ],
