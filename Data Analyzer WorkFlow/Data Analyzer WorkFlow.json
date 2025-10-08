@@ -1,0 +1,274 @@
+{
+  "createdAt": "2025-09-26T07:49:41.294Z",
+  "updatedAt": "2025-09-29T12:00:22.000Z",
+  "id": "FZTjtUFgxzfUFXjW",
+  "name": "Data Analyzer WorkFlow",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cd1e61ae-8400-473a-b52a-1c371acd5445",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -816,
+        0
+      ],
+      "id": "2660589e-35c3-4625-96ee-49990cde2ccf",
+      "name": "Webhook",
+      "webhookId": "cd1e61ae-8400-473a-b52a-1c371acd5445"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        0
+      ],
+      "id": "a1d9be3d-ab26-487a-8efb-c8e891e691ab",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        112,
+        240
+      ],
+      "id": "fcc49ed6-de35-478f-ad59-980d8745f05e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "IyauFwFPi6IGIjtD",
+          "name": "Google Gemini(PaLM) Api account SKINPERFECTION"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        704,
+        0
+      ],
+      "id": "b3c6eac0-ed82-4f16-9338-346d083a2593",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get rows\nconst items = $input.all();\nconst data = items.map(i => i.json);\n\n// --- Helpers ---\nconst mean = arr => arr.reduce((a, b) => a + b, 0) / arr.length;\nconst median = arr => {\n  const sorted = [...arr].sort((a, b) => a - b);\n  const mid = Math.floor(sorted.length / 2);\n  return sorted.length % 2 !== 0\n    ? sorted[mid]\n    : (sorted[mid - 1] + sorted[mid]) / 2;\n};\nconst stdDev = arr => {\n  const m = mean(arr);\n  const variance = mean(arr.map(x => Math.pow(x - m, 2)));\n  return Math.sqrt(variance);\n};\nconst correlation = (xArr, yArr) => {\n  if (xArr.length !== yArr.length) return null;\n  const n = xArr.length;\n  const meanX = mean(xArr);\n  const meanY = mean(yArr);\n  const num = xArr.reduce((sum, x, i) => sum + (x - meanX) * (yArr[i] - meanY), 0);\n  const den = Math.sqrt(\n    xArr.reduce((sum, x) => sum + Math.pow(x - meanX, 2), 0) *\n    yArr.reduce((sum, y) => sum + Math.pow(y - meanY, 2), 0)\n  );\n  return den === 0 ? null : num / den;\n};\n\n// --- Detect fields automatically ---\nconst fields = Object.keys(data[0] || {});\nconst numericFields = [];\nconst categoricalFields = [];\n\nfor (const field of fields) {\n  const values = data.map(r => r[field]).filter(v => v !== null && v !== undefined && v !== \"\");\n  if (values.length === 0) continue;\n\n  const numericCount = values.filter(v => !isNaN(parseFloat(v))).length;\n  const ratio = numericCount / values.length;\n\n  // If most values look numeric, treat as numeric\n  if (ratio > 0.8) {\n    // convert to numbers\n    data.forEach(r => {\n      if (r[field] !== undefined && r[field] !== null && r[field] !== \"\") {\n        const num = parseFloat(r[field]);\n        r[field] = isNaN(num) ? null : num;\n      }\n    });\n    numericFields.push(field);\n  } else {\n    categoricalFields.push(field);\n  }\n}\n\n// --- Analysis ---\nconst summary = { numeric: {}, categorical: {}, correlations: {} };\n\n// Numeric stats\nfor (const field of numericFields) {\n  const values = data.map(r => r[field]).filter(v => typeof v === \"number\");\n  if (values.length === 0) continue;\n  summary.numeric[field] = {\n    count: values.length,\n    min: Math.min(...values),\n    max: Math.max(...values),\n    mean: parseFloat(mean(values).toFixed(2)),\n    median: median(values),\n    stdDev: parseFloat(stdDev(values).toFixed(2))\n  };\n}\n\n// Categorical stats\nfor (const field of categoricalFields) {\n  const values = data.map(r => r[field]).filter(v => v !== null && v !== undefined && v !== \"\");\n  const freq = {};\n  values.forEach(v => { freq[v] = (freq[v] || 0) + 1; });\n  summary.categorical[field] = {\n    count: values.length,\n    unique: Object.keys(freq).length,\n    frequencies: freq\n  };\n}\n\n// Pairwise correlations\nfor (let i = 0; i < numericFields.length; i++) {\n  for (let j = i + 1; j < numericFields.length; j++) {\n    const f1 = numericFields[i];\n    const f2 = numericFields[j];\n    const vals1 = data.map(r => r[f1]).filter(v => typeof v === \"number\");\n    const vals2 = data.map(r => r[f2]).filter(v => typeof v === \"number\");\n    if (vals1.length === vals2.length && vals1.length > 1) {\n      summary.correlations[`${f1}-${f2}`] = parseFloat(correlation(vals1, vals2).toFixed(3));\n    }\n  }\n}\n\n// Return summary\nreturn [{ json: summary }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        0
+      ],
+      "id": "d950c448-0d8a-45a5-a43e-382c50bdf877",
+      "name": "EDA Node1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all rows from previous node\nconst items = $input.all();\n\n// Config: define rules (adjust per dataset)\nconst config = {\n  numericFields: [\"Age\", \"Salary\"],   // fields to treat as numbers\n  requiredFields: [\"Name\", \"Age\"],    // must not be empty\n  dateFields: [\"JoinDate\"]            // fields to convert to YYYY-MM-DD\n};\n\n// Helper: check if number\nconst toNumber = (val) => {\n  const n = parseFloat(val);\n  return isNaN(n) ? null : n;\n};\n\n// Helper: normalize date\nconst toDate = (val) => {\n  if (!val) return null;\n  const d = new Date(val);\n  return isNaN(d.getTime()) ? null : d.toISOString().split(\"T\")[0];\n};\n\n// Process each row\nconst cleaned = items.map((item, idx) => {\n  const row = item.json;\n  const errors = [];\n\n  // Required fields check\n  config.requiredFields.forEach(field => {\n    if (!row[field] || row[field].toString().trim() === \"\") {\n      errors.push(`${field} is missing`);\n    }\n  });\n\n  // Convert numeric fields\n  config.numericFields.forEach(field => {\n    if (row[field] !== undefined) {\n      const num = toNumber(row[field]);\n      if (num === null) {\n        errors.push(`${field} is not numeric`);\n      } else {\n        row[field] = num;\n      }\n    }\n  });\n\n  // Normalize date fields\n  config.dateFields.forEach(field => {\n    if (row[field]) {\n      row[field] = toDate(row[field]);\n      if (row[field] === null) {\n        errors.push(`${field} is invalid date`);\n      }\n    }\n  });\n\n  return {\n    json: {\n      ...row,\n      _row: idx + 1,\n      \n    }\n  };\n});\n\nreturn cleaned;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        0
+      ],
+      "id": "42fe74eb-25d7-4db8-bf49-b16c32cf610f",
+      "name": "Data Cleaning"
+    },
+    {
+      "parameters": {
+        "jsCode": "const summary = $json; // take whole summary object\n\nreturn [{\n  json: {\n    text: JSON.stringify(summary, null, 2)  // pretty-print as text\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        0
+      ],
+      "id": "50293992-a449-44fc-9d3f-45fc0fcc6e2e",
+      "name": "CONVERT DATA INTO STRING"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=this is your data:\n{{ $json.text }}",
+        "options": {
+          "systemMessage": "=You are a senior data analyst. \nYou will receive dataset summaries produced by an automated workflow. \nThe summaries include:\n- **Numeric field statistics** (count, min, max, mean, median, standard deviation).\n- **Categorical field summaries** (unique values and frequency counts).\n- **Pairwise correlations** (Pearson coefficient between numeric fields).\n\nYour tasks:\n1. Interpret the summary as if you are analyzing the raw dataset.\n2. Identify important patterns, trends, and anomalies.\n3. Highlight strong correlations (positive or negative).\n4. Explain practical insights (e.g., business, scientific, or operational implications).\n5. Suggest 2–5 clear recommendations or next steps.\n\nRules:\n- Always explain findings in simple, clear language.\n- Do not repeat the JSON or raw stats verbatim. Focus on interpretation.\n- If some fields look like IDs, indexes, or technical placeholders (e.g. \"_row\"), ignore them.\n- Output your answer in **structured JSON** with two keys:\n  {\n    \"insights\": [ \"bullet point insight 1\", \"bullet point insight 2\" ],\n    \"recommendations\": [ \"recommendation 1\", \"recommendation 2\" ]\n  }\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        112,
+        0
+      ],
+      "id": "9be969d7-2ab4-4b5d-920c-9a148c32a29a",
+      "name": "DATA ANALYST"
+    },
+    {
+      "parameters": {
+        "jsCode": "let raw = $json.output || $json;\n\nif (typeof raw === \"string\") {\n  raw = raw.replace(/```json|```/g, \"\").trim();\n  try {\n    raw = JSON.parse(raw);\n  } catch (e) {\n    raw = { insights: [raw], recommendations: [] };\n  }\n}\n\nreturn [{ json: raw }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        0
+      ],
+      "id": "1a5e268d-68b0-4fac-b6bb-8e5e51e96e87",
+      "name": "OUTPUT CLEANER"
+    },
+    {
+      "parameters": {
+        "content": "## DATA ANALYST\n\n",
+        "height": 816,
+        "width": 2000
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -960,
+        -336
+      ],
+      "typeVersion": 1,
+      "id": "9fa5bc73-76de-4a88-b642-9accd4af02f0",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "Data Cleaning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "DATA ANALYST",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "EDA Node1": {
+      "main": [
+        [
+          {
+            "node": "CONVERT DATA INTO STRING",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Cleaning": {
+      "main": [
+        [
+          {
+            "node": "EDA Node1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CONVERT DATA INTO STRING": {
+      "main": [
+        [
+          {
+            "node": "DATA ANALYST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DATA ANALYST": {
+      "main": [
+        [
+          {
+            "node": "OUTPUT CLEANER",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OUTPUT CLEANER": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "46a27356-c6f4-4cad-92f0-ea46f7460a9b",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-09-26T07:49:41.304Z",
+      "updatedAt": "2025-09-26T07:49:41.304Z",
+      "role": "workflow:owner",
+      "workflowId": "FZTjtUFgxzfUFXjW",
+      "projectId": "zHjIixMuDBpDICPD"
+    }
+  ],
+  "tags": []
+}
