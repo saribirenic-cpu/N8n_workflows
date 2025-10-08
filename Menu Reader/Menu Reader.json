@@ -1,0 +1,490 @@
+{
+  "createdAt": "2025-10-06T05:34:26.295Z",
+  "updatedAt": "2025-10-08T06:01:52.000Z",
+  "id": "J60ugKErXg85obgO",
+  "name": "Menu Reader",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "de279432-8fae-40c2-a488-db29379a5a8d",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.ocr.space/parse/image",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "base64Image",
+              "value": "=data:{{ $('Webhook').item.binary.file.mimeType }};base64,{{ $json.data }}"
+            },
+            {
+              "name": "language",
+              "value": "eng"
+            },
+            {
+              "name": "isOverlayRequired",
+              "value": "false"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "dba502b1-8fc5-496b-9863-666d403468df",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Qqc7XuWLKrmH4AKE",
+          "name": "ocrspace"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=This the menu {{ $json.ParsedResults[0].ParsedText }}",
+        "options": {
+          "systemMessage": "You are a menu parser.  \nExtract all dishes from the text below and include their short descriptions if available.  \nReturn output strictly in JSON format:\n[\n  { \"dish_name\": \"name\", \"description\": \"short description\" }\n]\n\nMenu text:\n{{ $json[\"ParsedResults\"][0][\"ParsedText\"] }}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        0
+      ],
+      "id": "de6b27fd-d732-4e17-8e62-8f25cc896b5c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        832,
+        256
+      ],
+      "id": "e4fe5869-354a-4661-b477-a697aafa1c53",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gkLnObHGaXpwa4bo",
+          "name": "Google Gemini(PaLM) Api account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the AI output text\nconst rawOutput = $json.output;\n\n// Clean markdown if exists\nconst cleaned = rawOutput\n  .replace(/```json\\n?/, '')\n  .replace(/```/, '')\n  .trim();\n\n// Parse JSON\nlet dishes = [];\ntry {\n  dishes = JSON.parse(cleaned);\n} catch (err) {\n  throw new Error('Failed to parse dish list: ' + err.message);\n}\n\n// Return each dish\nreturn [\n  {\n    json: {\n      dishes: dishes\n    }\n  }\n];\n\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "a275dff5-a083-40ba-818d-e94feebb151a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"google/nano-banana\",\n  \"input\": {\n    \"prompt\": \"Generate the image of {{ $json.body.dish_name }} with the description how it served to the customers {{ $json.body.description }} in white plate the background should give restaurant vibe and plat put on the table.\",\n    \"output_format\": \"png\",\n    \"image_size\": \"1:1\"\n  }\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        560
+      ],
+      "id": "ad5a0736-4e4d-481f-bbb9-7fe7dceb42a8",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "pSTnnh2jyPfxTDnp",
+          "name": "kie ai"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $json.data.taskId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        784,
+        560
+      ],
+      "id": "f6b223d1-58ae-4eed-82ca-05483086918c",
+      "name": "HTTP Request2",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "pSTnnh2jyPfxTDnp",
+          "name": "kie ai"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d2fdf977-bdac-4012-bee7-a421274b8d08",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "218dda9c-f41e-4634-9033-10176dc3d054",
+      "name": "Webhook",
+      "webhookId": "d2fdf977-bdac-4012-bee7-a421274b8d08"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1424,
+        0
+      ],
+      "id": "ef881276-1ce8-4261-ba2a-848ccc1f3851",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d2fdf977-bdac-4012-bee7-a421274b8d09",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS   "
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type, Authorization"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        224,
+        560
+      ],
+      "id": "00430203-e2c6-4e1d-8a3d-668945b9a91b",
+      "name": "Webhook1",
+      "webhookId": "d2fdf977-bdac-4012-bee7-a421274b8d08"
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1424,
+        560
+      ],
+      "id": "2285e150-1ab2-485e-9682-222befc58f09",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "72d7c329-13d5-40a8-b34e-206f024dc20b",
+              "name": "image_url",
+              "value": "={{ JSON.parse($json.data.resultJson).resultUrls[0] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1216,
+        560
+      ],
+      "id": "8c6703db-df11-42e5-8e1c-db071aa883b5",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cd4216eb-2e97-441d-8978-391f553d5df7",
+              "leftValue": "={{ $json.data.state }}",
+              "rightValue": "=success",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        560
+      ],
+      "id": "a4d69018-65fe-4a4a-be95-694bfd0e3074",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        992,
+        816
+      ],
+      "id": "c0cd2f82-0d6a-43b9-99c7-15461b84dff9",
+      "name": "Wait",
+      "webhookId": "53863fae-5795-42eb-9597-842c617a1a93"
+    }
+  ],
+  "connections": {
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "65ebac05-f0cd-4d9e-bdda-ff661e7303cf",
+  "triggerCount": 2,
+  "shared": [
+    {
+      "createdAt": "2025-10-06T05:34:26.305Z",
+      "updatedAt": "2025-10-06T05:34:26.305Z",
+      "role": "workflow:owner",
+      "workflowId": "J60ugKErXg85obgO",
+      "projectId": "zHjIixMuDBpDICPD"
+    }
+  ],
+  "tags": []
+}
