@@ -1,0 +1,234 @@
+{
+  "createdAt": "2025-09-25T05:24:56.562Z",
+  "updatedAt": "2025-09-25T13:54:41.000Z",
+  "id": "GR9HNMyWW0ACSrEy",
+  "name": "Wealthy and wise tracking",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "wealthy and wise tracking",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Trade Number",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Action Occurred",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Closed A Trade",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "At Action",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "At Close",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Type",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Action",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Number",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Expiration Date",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Assignment Cost $ / Share",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Strike Price $ / Share",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "I-Volatility (%)",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Probability (Delta)",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Action",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Close",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Sheet_Name",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -1072,
+        -592
+      ],
+      "id": "42e3cc48-9eb1-4c5e-a7b7-06fe46a9b449",
+      "name": "On form submission",
+      "webhookId": "8e45e3e0-f491-4530-bf0d-29b25ea883f3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://script.google.com/macros/s/AKfycbxjkFLpuQIgTtd-y8uSoShtu3VvFC6ABzx3w2ByExLYQ3NsOlD_FYvAarzCNeDX_Uly/exec",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"Trade Number\": 1,\n  \"Action Occurred\": \"2025-03-31\",\n  \"Closed A Trade\": \"2025-05-02\",\n  \"At Action\": 29.88,\n  \"At Close\": 39.54,\n  \"Type\": \"Puts\",\n  \"Action\": 2.94,\n  \"Number\": 1,\n  \"Expiration Date\": \"2025-05-02\",\n  \"Assignment Cost $ / Share\": 0,\n  \"Strike Price $ / Share\": 29,\n  \"I-Volatility (%)\": 102,\n  \"Probability (Delta)\": 0.4,\n  \"Close\": 0,\n  \"Sheet_Name\": \"Test_N8n\"\n  \n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -752,
+        -560
+      ],
+      "id": "f232a7c8-47e8-4776-bde3-a4fc5a197257",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "=\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1248,
+        -640
+      ],
+      "id": "f4ff8dd0-2b93-4c13-bec7-c85979162579",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://script.google.com/macros/s/AKfycbxjkFLpuQIgTtd-y8uSoShtu3VvFC6ABzx3w2ByExLYQ3NsOlD_FYvAarzCNeDX_Uly/exec",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1168,
+        -192
+      ],
+      "id": "8e8e525d-669d-407a-bbfa-70d2d4c81766",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1408,
+        -240
+      ],
+      "id": "909c96bc-e767-4c15-8735-b5109434ba17",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "Trade Number": 1,
+          "Action Occurred": "2025-03-31",
+          "Closed A Trade": "2025-05-02",
+          "At Action": 29.88,
+          "At Close": 39.54,
+          "Type": "Puts",
+          "Action": 2.94,
+          "Number": 1,
+          "Expiration Date": "2025-05-02",
+          "Assignment Cost $ / Share": 0,
+          "Strike Price $ / Share": 29,
+          "I-Volatility (%)": 102,
+          "Probability (Delta)": 0.4,
+          "Close": 0,
+          "Sheet_Name": "Test_N8n",
+          "submittedAt": "2025-09-25T10:35:10.774+05:00",
+          "formMode": "production"
+        }
+      }
+    ]
+  },
+  "versionId": "3dee8cf5-fd8d-4680-8303-0968ee968e69",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-09-25T05:24:56.571Z",
+      "updatedAt": "2025-09-25T05:24:56.571Z",
+      "role": "workflow:owner",
+      "workflowId": "GR9HNMyWW0ACSrEy",
+      "projectId": "zHjIixMuDBpDICPD"
+    }
+  ],
+  "tags": []
+}
