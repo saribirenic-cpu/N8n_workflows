@@ -1,0 +1,189 @@
+{
+  "createdAt": "2025-09-09T06:22:36.969Z",
+  "updatedAt": "2025-09-09T11:59:43.000Z",
+  "id": "22wgwYktLdIDqgSb",
+  "name": "Expandi testing workflow",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -304,
+        16
+      ],
+      "id": "f6e4c4bb-1626-4292-9052-4d1f6d5395f3",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appsrCg5gjJ9iCVta",
+          "mode": "list",
+          "cachedResultName": "n8n_tetsing (Copy)",
+          "cachedResultUrl": "https://airtable.com/appsrCg5gjJ9iCVta"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblN3bOlBaOE72S9a",
+          "mode": "list",
+          "cachedResultName": "Expandi",
+          "cachedResultUrl": "https://airtable.com/appsrCg5gjJ9iCVta/tblN3bOlBaOE72S9a"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -96,
+        16
+      ],
+      "id": "f13ed5d5-3c97-46ba-931f-bf71e3f70966",
+      "name": "Search records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "6ZhpeaLQSeTya7dP",
+          "name": "Airtable Personal Access Token account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7834a76e-bdca-4db1-82ac-c88a3394965a",
+              "name": "Name",
+              "value": "={{ $json['First Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "cb6f80f0-7988-4c36-9b02-25ae3fa0ea7f",
+              "name": "last name",
+              "value": "={{ $json['Last Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "bb2924d9-860b-4af0-8d62-c9c5c8d1afb3",
+              "name": "company",
+              "value": "={{ $json.Company }}",
+              "type": "string"
+            },
+            {
+              "id": "bbd24d9c-31a4-444b-9c30-f2a571186e2c",
+              "name": "LinkedIN URL",
+              "value": "={{ $json.Profile_URL }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        112,
+        16
+      ],
+      "id": "7a6f62be-8934-482f-b44f-df4360fcdc72",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.liaufa.com/api/v1/open-api/campaign-instance/725995/assign/?key=6c46cb81-1987-47be-aade-2373c92ae4bf&secret=c518d888-6ee6-4ba2-b6e8-b22369b0ee8f",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "profile_link",
+              "value": "={{ $json['LinkedIN URL'] }}"
+            },
+            {
+              "name": "firstName",
+              "value": "={{ $json.Name }}"
+            },
+            {
+              "name": "lastname",
+              "value": "={{ $json['last name'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        16
+      ],
+      "id": "8a0f35b8-009b-4920-872b-1521cfc756c3",
+      "name": "HTTP Request"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "47ee74cc-e822-432c-99e1-3550c7eb2fe2",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-09-09T06:22:36.978Z",
+      "updatedAt": "2025-09-09T06:22:36.978Z",
+      "role": "workflow:owner",
+      "workflowId": "22wgwYktLdIDqgSb",
+      "projectId": "zHjIixMuDBpDICPD"
+    }
+  ],
+  "tags": []
+}
