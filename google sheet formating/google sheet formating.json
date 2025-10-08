@@ -1,0 +1,174 @@
+{
+  "createdAt": "2025-09-24T07:19:57.528Z",
+  "updatedAt": "2025-09-24T08:59:21.000Z",
+  "id": "8cxmkOiV8PNx4u9p",
+  "name": "google sheet formating",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        -16
+      ],
+      "id": "b0ff6be1-ffd9-4e1a-839b-f9042af0db95",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1qnbZAQSj2XWOkDbDgNdyXSp1OGZpJO0efg22HBP5--Q:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"requests\": [\n    {\n      \"autoResizeDimensions\": {\n        \"dimensions\": {\n          \"sheetId\": 0,\n          \"dimension\": \"COLUMNS\",\n          \"startIndex\": 0,\n          \"endIndex\": 26\n        }\n      }\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -336,
+        -16
+      ],
+      "id": "371a244b-3102-4172-aaf5-0ceb8b2d8a6b",
+      "name": "HTTP Request",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7HVGdyutA8pUv6FV",
+          "name": "sheet authorization"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "spreadsheet",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -528,
+        304
+      ],
+      "id": "c5a37e9b-b43c-4e7b-943c-3cfd933ffbd3",
+      "name": "Create spreadsheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7HVGdyutA8pUv6FV",
+          "name": "sheet authorization"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1qnbZAQSj2XWOkDbDgNdyXSp1OGZpJO0efg22HBP5--Q:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"requests\": [\n    {\n      \"repeatCell\": {\n        \"range\": {\n          \"sheetId\": 0,\n          \"startColumnIndex\": 0,\n          \"endColumnIndex\": 3\n        },\n        \"cell\": {\n          \"userEnteredFormat\": {\n            \"backgroundColor\": {\n              \"red\": 0.157,\n              \"green\": 0.059,\n              \"blue\": 1.0\n            }\n          }\n        },\n        \"fields\": \"userEnteredFormat.backgroundColor\"\n      }\n    }\n  ]\n}\n\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -128,
+        -16
+      ],
+      "id": "964c51df-6d18-42b9-a29b-f6b8a975b22e",
+      "name": "HTTP Request1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7HVGdyutA8pUv6FV",
+          "name": "sheet authorization"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1qnbZAQSj2XWOkDbDgNdyXSp1OGZpJO0efg22HBP5--Q:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"requests\": [\n    {\n      \"addChart\": {\n        \"chart\": {\n          \"spec\": {\n            \"title\": \"Sales Performance\",\n            \"basicChart\": {\n              \"chartType\": \"COLUMN\",\n              \"legendPosition\": \"BOTTOM_LEGEND\",\n              \"axis\": [\n                { \"position\": \"BOTTOM_AXIS\", \"title\": \"Date / Product\" },\n                { \"position\": \"LEFT_AXIS\", \"title\": \"Values\" }\n              ],\n              \"domains\": [\n                {\n                  \"domain\": {\n                    \"sourceRange\": {\n                      \"sources\": [\n                        {\n                          \"sheetId\": 0,\n                          \"startRowIndex\": 1,\n                          \"endRowIndex\": 20,\n                          \"startColumnIndex\": 0,\n                          \"endColumnIndex\": 1\n                        }\n                      ]\n                    }\n                  }\n                }\n              ],\n              \"series\": [\n                {\n                  \"series\": {\n                    \"sourceRange\": {\n                      \"sources\": [\n                        {\n                          \"sheetId\": 0,\n                          \"startRowIndex\": 1,\n                          \"endRowIndex\": 20,\n                          \"startColumnIndex\": 1,\n                          \"endColumnIndex\": 2\n                        }\n                      ]\n                    }\n                  },\n                  \"targetAxis\": \"LEFT_AXIS\"\n                },\n                {\n                  \"series\": {\n                    \"sourceRange\": {\n                      \"sources\": [\n                        {\n                          \"sheetId\": 0,\n                          \"startRowIndex\": 1,\n                          \"endRowIndex\": 20,\n                          \"startColumnIndex\": 2,\n                          \"endColumnIndex\": 3\n                        }\n                      ]\n                    }\n                  },\n                  \"targetAxis\": \"LEFT_AXIS\"\n                }\n              ]\n            }\n          },\n          \"position\": {\n            \"overlayPosition\": {\n              \"anchorCell\": { \"sheetId\": 0, \"rowIndex\": 1, \"columnIndex\": 4 }\n            }\n          }\n        }\n      }\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        32,
+        -16
+      ],
+      "id": "5e3d3feb-b040-4a2d-a75a-7f6ae91a0f98",
+      "name": "HTTP Request2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7HVGdyutA8pUv6FV",
+          "name": "sheet authorization"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "21473576-d183-4ba4-83dd-a9f60509435e",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-09-24T07:19:57.536Z",
+      "updatedAt": "2025-09-24T07:19:57.536Z",
+      "role": "workflow:owner",
+      "workflowId": "8cxmkOiV8PNx4u9p",
+      "projectId": "zHjIixMuDBpDICPD"
+    }
+  ],
+  "tags": []
+}
