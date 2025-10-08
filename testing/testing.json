@@ -1,0 +1,81 @@
+{
+  "createdAt": "2025-08-26T05:25:15.139Z",
+  "updatedAt": "2025-08-27T12:08:05.000Z",
+  "id": "JX9mRmFEo1dYyTNz",
+  "name": "testing",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4d4db601-0c0f-4ce5-a5f3-5b4c97873dc3",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1LtyjVCgmssTeBri_rrWmKRPiOIaTlrU7",
+          "mode": "list",
+          "cachedResultName": "response.json.json",
+          "cachedResultUrl": "https://drive.google.com/file/d/1LtyjVCgmssTeBri_rrWmKRPiOIaTlrU7/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d69bd93c-7e95-4b1d-8fc6-aec604c0fcbe",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AnfwAjxNrfLJbZz4",
+          "name": "Google Drive account 8"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "982de411-7b18-474d-8664-334ae936dbe2",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-08-26T05:25:15.148Z",
+      "updatedAt": "2025-08-26T05:25:15.148Z",
+      "role": "workflow:owner",
+      "workflowId": "JX9mRmFEo1dYyTNz",
+      "projectId": "zHjIixMuDBpDICPD"
+    }
+  ],
+  "tags": []
+}
