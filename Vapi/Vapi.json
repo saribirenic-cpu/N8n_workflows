@@ -1,0 +1,99 @@
+{
+  "createdAt": "2025-09-22T11:05:30.473Z",
+  "updatedAt": "2025-09-22T11:47:46.000Z",
+  "id": "HO5SOYUMvUyLIOS9",
+  "name": "Vapi",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vapi-call",
+        "options": {}
+      },
+      "id": "81a327d1-d7f6-4287-97bb-07eddd06ccc6",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -16
+      ],
+      "webhookId": "4b3e3e15-3970-4b48-881f-b072294401dd"
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "url": "https://api.vapi.ai/calls",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "95e072b6-3bc6-476c-9ce1-c35136ecd53d",
+      "name": "HTTP Request (Start Vapi Call)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "url": "https://api.vapi.ai/events",
+        "options": {}
+      },
+      "id": "def29cfe-c737-4625-bfe9-ec74ebc46cca",
+      "name": "HTTP Request (Handle Vapi Events)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        112,
+        -16
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request (Start Vapi Call)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request (Start Vapi Call)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request (Handle Vapi Events)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "8e1b2717-a292-425a-bca4-333377db7e6c",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-09-22T11:05:30.482Z",
+      "updatedAt": "2025-09-22T11:05:30.482Z",
+      "role": "workflow:owner",
+      "workflowId": "HO5SOYUMvUyLIOS9",
+      "projectId": "zHjIixMuDBpDICPD"
+    }
+  ],
+  "tags": []
+}
