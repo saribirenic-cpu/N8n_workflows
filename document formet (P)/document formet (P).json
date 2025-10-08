@@ -1,0 +1,736 @@
+{
+  "createdAt": "2025-09-30T05:06:44.471Z",
+  "updatedAt": "2025-10-03T06:34:14.000Z",
+  "id": "9uPC621MObjvbIIJ",
+  "name": "document formet (P)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1440,
+        -496
+      ],
+      "id": "93b5cfcf-6c20-4403-bffe-fdc3a91d6a02",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        0
+      ],
+      "id": "60cb203f-3de7-4228-8baa-0ffc4f98f653",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://docs.googleapis.com/v1/documents/{{ $json.id }}:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDocsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"requests\": [\n    {\n      \"createHeader\": {\n        \"type\": \"DEFAULT\"\n      }\n    },\n    {\n      \"createFooter\": {\n        \"type\": \"DEFAULT\"\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2800,
+        -512
+      ],
+      "id": "18369445-566e-4dc2-915c-950e4fdce4aa",
+      "name": "HTTP Request1",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "yH5TnPwPEBgBJs6v",
+          "name": "Google Docs account 11"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "project overwiew",
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1056,
+        -480
+      ],
+      "id": "414f2875-72e0-4fab-9fd6-7bc98489de6c",
+      "name": "Search files and folders2",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AnfwAjxNrfLJbZz4",
+          "name": "Google Drive account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -880,
+        -480
+      ],
+      "id": "fe350885-84f6-459f-8277-7dc030f7ab6f",
+      "name": "Download file3",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AnfwAjxNrfLJbZz4",
+          "name": "Google Drive account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "formatting",
+          "mode": "list",
+          "cachedResultName": "formatting"
+        },
+        "options": {
+          "pineconeNamespace": "formet-doc"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -640,
+        -480
+      ],
+      "id": "d109b761-25bf-4669-a04e-a8ea2da8aeda",
+      "name": "Pinecone Vector Store4",
+      "credentials": {
+        "pineconeApi": {
+          "id": "WG0M0FPcBnRN0GDD",
+          "name": "PineconeApi account 12"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -384,
+        -240
+      ],
+      "id": "d1691716-6dd2-4fa9-9c7f-27ccf6d7e851",
+      "name": "Default Data Loader2"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1312,
+        -48
+      ],
+      "id": "7a84a5b2-9226-4422-8215-92bbed75b30c",
+      "name": "Embeddings Google Gemini4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gkLnObHGaXpwa4bo",
+          "name": "Google Gemini(PaLM) Api account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "formetting",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Company name ",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Project Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "OVERVIEW",
+              "requiredField": true
+            },
+            {
+              "fieldType": "html",
+              "elementName": "Goals",
+              "html": "<li></li>\n\n\n"
+            },
+            {
+              "fieldLabel": "Specification",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "milstone"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        544,
+        -512
+      ],
+      "id": "fb410731-8d51-4da1-9019-6777a5ca23ed",
+      "name": "On form submission2",
+      "webhookId": "23153348-11a8-46a4-b2e2-34226f925801"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=The information is provided to you your task is to get the formatting instruction from your tool and update the google doc\n\nCompany Name: {{ $('On form submission2').item.json['Company name '] }}\nProject: {{ $('On form submission2').item.json['Project Name'] }}\nOverview: {{ $('On form submission2').item.json.OVERVIEW }}\nSpecification: {{ $('On form submission2').item.json.Specification }}\nMilestone: {{ $('On form submission2').item.json.milstone }}\n",
+        "options": {
+          "systemMessage": "=You are a **Document Formatting Specialist AI Agent**. Your task is to take the user's raw input data and the retrieved template content, and combine them into a single, valid **HTML string** that *STRICTLY* adheres to the template's structure.\n\n**Strict Generation Rules:**\n1.  **NO ADDED CONTENT:** You must not add any non-template content, such as a Table of Contents, Conclusion section, or verbose headers/footers, unless they were explicitly part of the content retrieved from the 'question' tool.\n2.  **STRICT HIERARCHY MAPPING:**\n    * The document's main title (Company Name: \"IT Automation\" in this case) must be formatted as **<h1>**. This will be the header.\n    * All section titles (Project Name, OVERVIEW, GOALS, SPECIFICATIONS, MILESTONES) must be formatted as **<h2>**.\n    * Any list items or steps (from GOALS, MILESTONES) must be converted into **unordered HTML bullet points (<ul> and <li> tags)**.\n3.  **STYLE RETENTION:** Use the formatting instructions (font, color, tone) found in the retrieved template to apply inline CSS for maximum fidelity.\n\n**Process:**\n1.  **Use the 'question' tool (RAG) ONCE** to retrieve the template structure and formatting rules.\n2.  **Generate the Final HTML Output:** Insert the user's raw data into the retrieved template's structure. Output **ONLY** the final, complete HTML string."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        -512
+      ],
+      "id": "7e495119-fe55-4cc5-a9e2-21c7bea92df1",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "formatting",
+          "mode": "list",
+          "cachedResultName": "formatting"
+        },
+        "options": {
+          "pineconeNamespace": "formet-doc"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        896,
+        -112
+      ],
+      "id": "3e3a2f61-abfd-4181-a8f0-2e61d4927997",
+      "name": "Pinecone Vector Store5",
+      "credentials": {
+        "pineconeApi": {
+          "id": "WG0M0FPcBnRN0GDD",
+          "name": "PineconeApi account 12"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -304
+      ],
+      "id": "bc1ba466-de63-4464-98b5-3a526a2927c1",
+      "name": "Google Gemini Chat Model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gkLnObHGaXpwa4bo",
+          "name": "Google Gemini(PaLM) Api account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        32
+      ],
+      "id": "174fc39e-91ae-498b-a621-beca7725edfc",
+      "name": "Google Gemini Chat Model5",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "IyauFwFPi6IGIjtD",
+          "name": "Google Gemini(PaLM) Api account SKINPERFECTION"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        896,
+        96
+      ],
+      "id": "c4565a31-b611-4ff6-bb5a-470ddeb16b6e",
+      "name": "Embeddings Google Gemini5",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "IyauFwFPi6IGIjtD",
+          "name": "Google Gemini(PaLM) Api account SKINPERFECTION"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "=Your task is to get the query from Ai agent and give the complete structure of document"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        1184,
+        -224
+      ],
+      "id": "c9a47ab1-62c0-4d7e-94b0-7bcf72fddf5e",
+      "name": "question2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// // Get the HTML string output from the previous node (AI Agent)\n// const htmlString = $json.output;\n\n// // Define the file name for the binary data\n// const binaryDataName = 'document.html';\n\n// // 1. Convert the HTML string into a Buffer\n// const buffer = Buffer.from(htmlString, 'utf8');\n\n// // 2. Attach binary data to the item\n// return {\n//   json: $json,\n//   binary: {\n//     [binaryDataName]: {\n//       data: buffer.toString('base64'),\n//       mimeType: 'text/html',\n//       fileName: binaryDataName,\n//     }\n//   }\n// };\n\nlet htmlString = $json.output;\n\n// Remove triple backticks and optional language tag (like ```html)\nhtmlString = htmlString.replace(/^```[a-zA-Z]*\\n?/, '').replace(/```$/, '');\n\n// Define the file name for the binary data\nconst binaryDataName = 'document.html';\n\n// Convert to Buffer\nconst buffer = Buffer.from(htmlString, 'utf8');\n\n// Return cleaned binary\nreturn {\n  json: { cleanedHtml: htmlString },\n  binary: {\n    [binaryDataName]: {\n      data: buffer.toString('base64'),\n      mimeType: 'text/html',\n      fileName: binaryDataName,\n    }\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        -608
+      ],
+      "id": "16529bce-ca02-47bd-88e6-f45faf09a3b1",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "=file content",
+        "name": "={{ $('On form submission2').item.json['Company name '] }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {
+          "convertToGoogleDocument": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1584,
+        -336
+      ],
+      "id": "d11e23e5-6f6b-4d12-aeef-adb97af5118f",
+      "name": "Create file from text1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AnfwAjxNrfLJbZz4",
+          "name": "Google Drive account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1872,
+        -512
+      ],
+      "id": "c9f553d7-f9a4-447f-af20-1001eae2aa95",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "changeFileContent": true,
+        "inputDataFieldName": "=document.html",
+        "options": {
+          "fields": [
+            "id",
+            "webViewLink"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2448,
+        -512
+      ],
+      "id": "4eb74ef4-4017-4a25-a186-33bf028a7536",
+      "name": "Update file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AnfwAjxNrfLJbZz4",
+          "name": "Google Drive account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://docs.googleapis.com/v1/documents/{{ $('Update file').item.json.id }}:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDocsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"requests\": [\n    {\n      \"insertText\": {\n        \"location\": {\n          \"segmentId\": \"{{ $json.replies[0].createHeader.headerId }}\",\n          \"index\": 0\n        },\n        \"text\": \"IrenicTech\"\n      }\n    },\n    {\n      \"insertInlineImage\": {\n        \"location\": {\n          \"segmentId\": \"{{ $json.replies[0].createHeader.headerId }}\",\n          \"index\": 10\n        },\n        \"uri\": \"https://res.cloudinary.com/dxrze3qnl/image/upload/v1756379049/samples/shoe.jpg\",\n        \"objectSize\": {\n          \"height\": { \"magnitude\": 40, \"unit\": \"PT\" },\n          \"width\": { \"magnitude\": 40, \"unit\": \"PT\" }\n        }\n      }\n    },\n    {\n      \"insertText\": {\n        \"location\": {\n          \"segmentId\": \"{{ $json.replies[1].createFooter.footerId }}\",\n          \"index\": 0\n        },\n        \"text\": \"Offical Document\"\n      }\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3056,
+        -512
+      ],
+      "id": "773a3668-8339-4338-ae61-97a63b0b54b9",
+      "name": "HTTP Request3",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "yH5TnPwPEBgBJs6v",
+          "name": "Google Docs account 11"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://script.google.com/macros/s/AKfycbyXgQNM--dqBrgwI6qbRtKnqllXgPyqJ_8mnCOmXOkJ6Rz5RWDnGiy7rw2QHAVPC8aC/exec",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"docId\": \"{{ $('Update file').item.json.id }}\",\n  \"headerText\": \"IrenicTech\",\n  \"imageUrl\": \"https://res.cloudinary.com/dxrze3qnl/image/upload/v1756379049/samples/shoe.jpg\"\n}\n ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3328,
+        -512
+      ],
+      "id": "24ddf377-2a17-43a2-80ab-76fe0d822fa3",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -592,
+        -272
+      ],
+      "id": "ec6bf5fc-8f4e-4c13-a160-3617c6c04c0f",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "ImLNGxIpMjncVje6",
+          "name": "Irenic Office key"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader2",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders2": {
+      "main": [
+        [
+          {
+            "node": "Download file3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file3": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader2": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store4",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini4": {
+      "ai_embedding": [
+        []
+      ]
+    },
+    "On form submission2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create file from text1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store5": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "question2",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "question2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini5": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store5",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "question2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create file from text1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Update file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update file": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store4",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "On form submission2": [
+      {
+        "json": {
+          "Company name ": "Irenictech",
+          "Project Name": "Inventory Menagement",
+          "OVERVIEW": "In this project, I developed an Inventory Management System in which data was created, retrieved, updated, and deleted using an Excel sheet.",
+          "Goals": "<li></li>\r\n\r\n\r\n",
+          "Specification": "The system is based on an Excel sheet where CRUD (Create, Read, Update, Delete) operations can be performed.",
+          "milstone": "Collect detailed requirements from stakeholders to understand inventory processes.",
+          "submittedAt": "2025-09-30T12:57:06.582+05:00",
+          "formMode": "test"
+        }
+      }
+    ]
+  },
+  "versionId": "b1cf618d-3706-408b-9f93-51501495b7bc",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-09-30T05:06:44.480Z",
+      "updatedAt": "2025-09-30T05:06:44.480Z",
+      "role": "workflow:owner",
+      "workflowId": "9uPC621MObjvbIIJ",
+      "projectId": "zHjIixMuDBpDICPD"
+    }
+  ],
+  "tags": []
+}
